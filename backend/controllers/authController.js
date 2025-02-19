@@ -2,8 +2,11 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const OTP = require("../models/otpModel");
 const sendOtp = require("../utils/sendOtp");
+const { GenerateAndSetTokens } = require("../utils/GenerateAndSetTokens");
 
-// Step 1: Send OTP during signup
+const sendResponse = (res, status, message) =>
+  res.status(status).json({ message });
+
 exports.initiateSignup = async (req, res) => {
   try {
     const { name, email, role } = req.body;
@@ -16,12 +19,18 @@ exports.initiateSignup = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const response = await sendOtp(email);
+    // Send OTP for email verification
+    const otpResponse = await sendOtp(email, true, name);
+
+    // Store temporary user data
+    req.app.locals.tempUser = { name, email, role };
+
+    // Pass tempUser to sendOtp
+    const response = await sendOtp(email, req.app.locals.tempUser);
     if (!response.success) {
       return res.status(500).json({ message: "OTP sending failed" });
     }
 
-    req.app.locals.tempUser = { name, email, role };
     res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
     console.error("Error in initiateSignup:", error);
@@ -29,94 +38,66 @@ exports.initiateSignup = async (req, res) => {
   }
 };
 
-// Step 2: Verify OTP and register user
 exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !otp) {
-      return res.status(400).json({ message: "Email and OTP are required" });
-    }
+    if (!email || !otp)
+      return sendResponse(res, 400, "Email and OTP are required");
 
-    const validOtp = await OTP.findOne({ email, otp });
-    if (!validOtp) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
-    }
+    if (!(await OTP.findOne({ email, otp })))
+      return sendResponse(res, 400, "Invalid or expired OTP");
 
     const tempUser = req.app.locals.tempUser;
-    if (!tempUser || tempUser.email !== email) {
-      return res
-        .status(400)
-        .json({ message: "Session expired. Restart signup" });
-    }
+    if (!tempUser || tempUser.email !== email)
+      return sendResponse(res, 400, "Session expired. Restart signup");
 
-    const { name, role } = tempUser;
-    const user = new User({ name, email, role, isVerified: true });
-    await user.save();
-
+    await new User({ ...tempUser, isVerified: true }).save();
     req.app.locals.tempUser = null;
     await OTP.deleteOne({ email });
 
-    res.status(201).json({ message: "User registered successfully" });
+    sendResponse(res, 201, "User registered successfully");
   } catch (error) {
     console.error("Error in verifyOtp:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendResponse(res, 500, "Internal server error");
   }
 };
 
-// Step 3: Send OTP for login
 exports.initiateLogin = async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
-    }
+    if (!email) return sendResponse(res, 400, "Email is required");
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
+    if (!(await User.findOne({ email })))
+      return sendResponse(res, 400, "User not found");
 
-    const response = await sendOtp(email);
-    if (!response.success) {
-      return res.status(500).json({ message: "OTP sending failed" });
-    }
+    if (!(await sendOtp(email)).success)
+      return sendResponse(res, 500, "OTP sending failed");
 
-    res.status(200).json({ message: "OTP sent successfully" });
+    sendResponse(res, 200, "OTP sent successfully");
   } catch (error) {
     console.error("Error in initiateLogin:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendResponse(res, 500, "Internal server error");
   }
 };
 
-// Step 4: Verify OTP and log in user
 exports.verifyLoginOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !otp) {
-      return res.status(400).json({ message: "Email and OTP are required" });
-    }
+    if (!email || !otp)
+      return sendResponse(res, 400, "Email and OTP are required");
 
-    const validOtp = await OTP.findOne({ email, otp });
-    if (!validOtp) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
-    }
+    if (!(await OTP.findOne({ email, otp })))
+      return sendResponse(res, 400, "Invalid or expired OTP");
 
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
+    if (!user) return sendResponse(res, 400, "User not found");
 
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
+    const tokens = GenerateAndSetTokens(user._id, user.role, res);
     await OTP.deleteOne({ email });
 
-    res.status(200).json({ token, role: user.role });
+    res.status(200).json({ tokens, role: user.role });
   } catch (error) {
     console.error("Error in verifyLoginOtp:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendResponse(res, 500, "Internal server error");
   }
 };
