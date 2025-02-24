@@ -9,15 +9,19 @@ export const GenerateAndSetTokens = (_id, role, res) => {
     expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
   });
 
-  const Options = {
-    httpOnly: true,
-    secure: true,
+  const cookieOptions = {
+    httpOnly: true, // Security: Prevents JS access
+    secure: process.env.NODE_ENV === "production", // Secure only in production
     sameSite: "Strict",
   };
 
+  // Clear previous cookies before setting new ones
+  res.clearCookie("AccessToken", cookieOptions);
+  res.clearCookie("RefreshToken", cookieOptions);
+
   res
-    .cookie("RefreshToken", RefreshToken, Options)
-    .cookie("AccessToken", AccessToken, Options);
+    .cookie("AccessToken", AccessToken, cookieOptions)
+    .cookie("RefreshToken", RefreshToken, cookieOptions);
 
   return { AccessToken, RefreshToken };
 };

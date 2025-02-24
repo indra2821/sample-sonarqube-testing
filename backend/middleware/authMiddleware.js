@@ -1,51 +1,30 @@
 const jwt = require("jsonwebtoken");
-const Enrollment = require("../models/Enrollment");
 
-exports.authenticateUser = (req, res, next) => {
-  const token =
-    req.cookies?.AccessToken || req.headers.authorization?.split(" ")[1];
+const authenticateUser = (req, res, next) => {
+  console.log("Cookies received:", req.cookies); // Debugging: Check if cookies exist
 
-  // console.log("Token: ", token);
-  // console.log("req.cookies: ", req.cookies);
+  const token = req.cookies?.accessToken; // Correct way to read token from cookies
 
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized - No token" });
+  }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ message: "Invalid token" });
+    return res.status(403).json({ message: "Unauthorized - Invalid token" });
   }
 };
 
-exports.isInstructor = (req, res, next) => {
-  if (!req.user || req.user.role !== "Instructor") {
-    return res
-      .status(403)
-      .json({ message: "Access denied. Instructors only." });
-  }
-  next();
-};
-
-exports.isEnrolled = async (req, res, next) => {
-  try {
-    const courseId = req.params.id;
-    const isEnrolled = await Enrollment.findOne({
-      user_id: req.user._id,
-      course_id: courseId,
-    });
-
-    if (!isEnrolled) {
-      return res.status(403).json({
-        message: "You must enroll in this course to access the content.",
-      });
+const authorizeRole = (role) => {
+  return (req, res, next) => {
+    if (!req.user || req.user.role !== role) {
+      return res.status(403).json({ message: "Forbidden - Access denied" });
     }
-
     next();
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal Server Error", error: error.message });
-  }
+  };
 };
+
+module.exports = { authenticateUser, authorizeRole };

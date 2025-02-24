@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require("cookie-parser"); // Import cookie-parser
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 
 const app = express();
@@ -9,24 +9,32 @@ const app = express();
 // Connect to MongoDB
 connectDB().catch((error) => {
   console.error("Database connection failed:", error.message);
-  process.exit(1); // Exit process if DB fails
+  process.exit(1);
 });
+
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
 // Middleware
 app.use(express.json());
 app.use(cors());
-app.use(cookieParser()); // Add cookie-parser middleware
+app.use(cookieParser());
+
+// Serve static files (for accessing uploaded content)
+app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/courses", require("./routes/courseRoutes"));
 app.use("/api/enrollment", require("./routes/enrollmentRoutes"));
+app.use("/api/quiz", require("./routes/quizRoutes"));
+app.use("/api/content", require("./routes/contentRoutes"));
+
 
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// Start Server & Handle Port
+// Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -1,8 +1,10 @@
 const express = require("express");
 const {
   authenticateUser,
-  isInstructor,
+  authorizeRole,
 } = require("../middleware/authMiddleware");
+const isInstructor = authorizeRole("Instructor");
+
 const {
   createCourse,
   getCourses,
@@ -15,14 +17,21 @@ const {
 
 const router = express.Router();
 
-// Centralized check for undefined imports
-const validateHandlers = { enrollInCourse };
-for (const [key, value] of Object.entries(validateHandlers)) {
-  if (typeof value !== "function") {
-    throw new Error(
-      `${key} is not defined. Check courseController.js exports.`
-    );
-  }
+// Check for missing handlers
+const requiredHandlers = [
+  createCourse,
+  getCourses,
+  getCourseById,
+  updateCourse,
+  deleteCourse,
+  enrollInCourse,
+  getCourseContent,
+];
+
+if (requiredHandlers.some((handler) => typeof handler !== "function")) {
+  throw new Error(
+    "One or more course controller functions are missing or not exported correctly."
+  );
 }
 
 // Public Routes
@@ -35,7 +44,7 @@ router.put("/:id", authenticateUser, isInstructor, updateCourse);
 router.delete("/:id", authenticateUser, isInstructor, deleteCourse);
 
 // Student-Only Routes
-router.post("/enroll", authenticateUser, enrollInCourse);
+router.post("/:id/enroll", authenticateUser, enrollInCourse);
 router.get("/:id/content", authenticateUser, getCourseContent);
 
 module.exports = router;

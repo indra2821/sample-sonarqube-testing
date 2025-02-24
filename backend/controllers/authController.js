@@ -19,14 +19,11 @@ exports.initiateSignup = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Send OTP for email verification
-    const otpResponse = await sendOtp(email, true, name);
-
     // Store temporary user data
     req.app.locals.tempUser = { name, email, role };
 
-    // Pass tempUser to sendOtp
-    const response = await sendOtp(email, req.app.locals.tempUser);
+    // Send OTP for email verification
+    const response = await sendOtp(email, true, name);
     if (!response.success) {
       return res.status(500).json({ message: "OTP sending failed" });
     }
@@ -44,16 +41,20 @@ exports.verifyOtp = async (req, res) => {
     if (!email || !otp)
       return sendResponse(res, 400, "Email and OTP are required");
 
-    if (!(await OTP.findOne({ email, otp })))
-      return sendResponse(res, 400, "Invalid or expired OTP");
+    const otpRecord = await OTP.findOne({ email, otp });
+    if (!otpRecord) return sendResponse(res, 400, "Invalid or expired OTP");
 
     const tempUser = req.app.locals.tempUser;
-    if (!tempUser || tempUser.email !== email)
+    if (!tempUser || tempUser.email !== email) {
       return sendResponse(res, 400, "Session expired. Restart signup");
+    }
 
-    await new User({ ...tempUser, isVerified: true }).save();
+    const newUser = await new User({ ...tempUser, isVerified: true }).save();
     req.app.locals.tempUser = null;
     await OTP.deleteOne({ email });
+
+    // Generate and set tokens for new user
+    GenerateAndSetTokens(newUser._id, newUser.role, res);
 
     sendResponse(res, 201, "User registered successfully");
   } catch (error) {
@@ -67,11 +68,11 @@ exports.initiateLogin = async (req, res) => {
     const { email } = req.body;
     if (!email) return sendResponse(res, 400, "Email is required");
 
-    if (!(await User.findOne({ email })))
-      return sendResponse(res, 400, "User not found");
+    const user = await User.findOne({ email });
+    if (!user) return sendResponse(res, 400, "User not found");
 
-    if (!(await sendOtp(email)).success)
-      return sendResponse(res, 500, "OTP sending failed");
+    const response = await sendOtp(email);
+    if (!response.success) return sendResponse(res, 500, "OTP sending failed");
 
     sendResponse(res, 200, "OTP sent successfully");
   } catch (error) {
@@ -82,20 +83,44 @@ exports.initiateLogin = async (req, res) => {
 
 exports.verifyLoginOtp = async (req, res) => {
   try {
-    const { email, otp } = req.body;
-    if (!email || !otp)
+    let { email, otp } = req.body;
+    if (!email || !otp) {
       return sendResponse(res, 400, "Email and OTP are required");
+    }
 
-    if (!(await OTP.findOne({ email, otp })))
+    // Normalize email (convert to lowercase)
+    email = email.trim().toLowerCase();
+    console.log(`Received normalized email: ${email}, OTP: ${otp}`);
+
+    // Check existing OTPs
+    const existingOtps = await OTP.find({ email });
+    console.log("Existing OTPs for this email:", existingOtps);
+
+    // Fetch the latest OTP
+    const otpRecord = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    console.log("Fetched OTP record:", otpRecord);
+
+    if (!otpRecord) {
       return sendResponse(res, 400, "Invalid or expired OTP");
+    }
+
+    if (otpRecord.otp !== otp.toString()) {
+      console.log(`Stored OTP: ${otpRecord.otp}, Provided OTP: ${otp}`);
+      return sendResponse(res, 400, "Invalid OTP");
+    }
 
     const user = await User.findOne({ email });
-    if (!user) return sendResponse(res, 400, "User not found");
+    if (!user) {
+      return sendResponse(res, 400, "User not found");
+    }
 
-    const tokens = GenerateAndSetTokens(user._id, user.role, res);
+    res.clearCookie("AccessToken");
+    res.clearCookie("RefreshToken");
+
+    GenerateAndSetTokens(user._id, user.role, res);
     await OTP.deleteOne({ email });
 
-    res.status(200).json({ tokens, role: user.role });
+    res.status(200).json({ role: user.role, message: "Login successful" });
   } catch (error) {
     console.error("Error in verifyLoginOtp:", error);
     sendResponse(res, 500, "Internal server error");

@@ -1,9 +1,9 @@
 const Enrollment = require("../models/Enrollment.js");
 
 // Create Course (Instructor Only)
-const Content = require("../models/Content.js"); // Import Content model
-const User = require("../models/userModel.js"); // Import User model
-const Course = require("../models/Course.js"); // Import Course model
+const Content = require("../models/Content.js"); 
+const User = require("../models/userModel.js"); 
+const Course = require("../models/Course.js");
 
 const createCourse = async (req, res) => {
   try {
@@ -23,12 +23,12 @@ const createCourse = async (req, res) => {
       return res.status(404).json({ message: "Instructor not found" });
     }
 
-    // Create the course first without content_Arr (we will update it later)
+    // Create the course first without content_Arr
     const newCourse = new Course({
       name,
       instructor: instructorData._id,
       instructor_email,
-      content_Arr: [], // Empty for now
+      content_Arr: [], 
     });
 
     await newCourse.save();
@@ -41,7 +41,7 @@ const createCourse = async (req, res) => {
           description: content.description,
           duration: content.duration,
           url: content.url || "https://example.com/default-url", // Ensure URL exists
-          course_id: newCourse._id, // Now course_id is set properly
+          course_id: newCourse._id, //
           uploaded_by: instructorData._id,
         });
 
@@ -130,8 +130,15 @@ const deleteCourse = async (req, res) => {
         .json({ message: "You Can Only Delete Your Own Courses" });
     }
 
+    // Delete all content associated with this course
+    await Content.deleteMany({ course_id: course._id });
+
+    // Delete the course
     await course.deleteOne();
-    res.status(200).json({ message: "Course Deleted Successfully" });
+
+    res
+      .status(200)
+      .json({ message: "Course and its contents deleted successfully" });
   } catch (error) {
     res
       .status(500)
@@ -142,28 +149,64 @@ const deleteCourse = async (req, res) => {
 // Enroll in Course
 const enrollInCourse = async (req, res) => {
   try {
-    const { courseId } = req.body;
+    const { id } = req.params; // Course ID from URL
+    const studentEmail = req.user.email; // Get email from logged-in user
 
-    // Prevent duplicate enrollment
-    const existingEnrollment = await Enrollment.findOne({
-      user: req.user._id,
-      course: courseId,
+    if (!id) {
+      return res.status(400).json({ message: "Course ID is required" });
+    }
+
+    // Find student by email
+    const student = await User.findOne({
+      email: studentEmail,
+      role: "Student",
     });
-    if (existingEnrollment)
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Find course by ID
+    const course = await Course.findById(id);
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Check if student is already enrolled
+    const existingEnrollment = await Enrollment.findOne({
+      user_id: student._id,
+      course_id: course._id,
+    });
+
+    if (existingEnrollment) {
       return res
         .status(400)
-        .json({ message: "Already Enrolled in this Course" });
+        .json({ message: "Already enrolled in this course" });
+    }
 
-    const enrollment = new Enrollment({ user: req.user._id, course: courseId });
-    await enrollment.save();
+    // Create new enrollment
+    const newEnrollment = new Enrollment({
+      user_id: student._id,
+      student_name: student.name,
+      student_email: student.email,
+      course_id: course._id,
+    });
 
-    res.status(201).json({ message: "Enrolled Successfully" });
+    await newEnrollment.save();
+
+    res.status(201).json({
+      message: "Student enrolled successfully",
+      enrollment: newEnrollment,
+    });
   } catch (error) {
+    console.error("Error enrolling student:", error);
     res
       .status(500)
       .json({ message: "Internal Server Error", error: error.message });
   }
 };
+
 
 // Access Course Content (Only Enrolled Students)
 const getCourseContent = async (req, res) => {
@@ -171,16 +214,24 @@ const getCourseContent = async (req, res) => {
     const { id } = req.params; // Course ID
     const userId = req.user._id;
 
-    const isEnrolled = await Enrollment.findOne({ user: userId, course: id });
+    console.log(`Checking enrollment for User: ${userId}, Course: ${id}`);
+
+    // Ensure user and course IDs are stored properly in Enrollment collection
+    const isEnrolled = await Enrollment.findOne({
+      user: userId,
+      course: id,
+    }).lean();
+
     if (!isEnrolled) {
       return res.status(403).json({ message: "Enroll in the course first!" });
     }
 
-    const course = await Course.findById(id).populate("content_Arr");
+    const course = await Course.findById(id).populate("content_Arr").lean();
     if (!course) return res.status(404).json({ message: "Course Not Found" });
 
     res.status(200).json(course.content_Arr);
   } catch (error) {
+    console.error("Error in getCourseContent:", error);
     res
       .status(500)
       .json({ message: "Internal Server Error", error: error.message });
