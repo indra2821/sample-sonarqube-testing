@@ -1,16 +1,18 @@
 const jwt = require("jsonwebtoken");
 
 const authenticateUser = (req, res, next) => {
-  console.log("Cookies received:", req.cookies); // Debugging: Check if cookies exist
+  //console.log("Cookies received:", req.cookies); 
 
-  const token = req.cookies?.accessToken; // Correct way to read token from cookies
+  // Update this line to match the cookie name in GenerateAndSetTokens.js
+  const token = req.cookies?.AccessToken; // Changed from accessToken to AccessToken
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized - No token" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    // Make sure to use the same secret as in GenerateAndSetTokens.js
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Changed from ACCESS_TOKEN_SECRET to JWT_SECRET
     req.user = decoded;
     next();
   } catch (error) {

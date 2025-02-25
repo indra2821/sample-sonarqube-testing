@@ -1,9 +1,26 @@
 const mongoose = require("mongoose");
 
-const contentSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  url: { type: String, required: true },
+const ContentSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  duration: {
+    type: Number,
+    default: 0,
+  },
+  url: {
+    type: String,
+    required: true,
+  },
+  full_url: {
+    type: String,
+    required: true,
+  },
   course_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Course",
@@ -14,8 +31,15 @@ const contentSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  created_at: { type: Date, default: Date.now },
+  file_type: {
+    type: String,
+    enum: ["video", "document", "image", "other"],
+    default: "other",
+  },
+  created_at: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-const Content = mongoose.model("Content", contentSchema);
-module.exports = Content;
+module.exports = mongoose.model("Content", ContentSchema);
