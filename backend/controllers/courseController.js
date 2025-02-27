@@ -1,8 +1,8 @@
 const Enrollment = require("../models/Enrollment.js");
 
 // Create Course (Instructor Only)
-const Content = require("../models/Content.js"); 
-const User = require("../models/userModel.js"); 
+const Content = require("../models/Content.js");
+const User = require("../models/userModel.js");
 const Course = require("../models/Course.js");
 
 const createCourse = async (req, res) => {
@@ -28,7 +28,7 @@ const createCourse = async (req, res) => {
       name,
       instructor: instructorData._id,
       instructor_email,
-      content_Arr: [], 
+      content_Arr: [],
     });
 
     await newCourse.save();
@@ -147,6 +147,7 @@ const deleteCourse = async (req, res) => {
 };
 
 // Enroll in Course
+// Enroll in Course (with progress initialization)
 const enrollInCourse = async (req, res) => {
   try {
     const { id } = req.params; // Course ID from URL
@@ -195,6 +196,10 @@ const enrollInCourse = async (req, res) => {
 
     await newEnrollment.save();
 
+    // Initialize progress tracking for this enrollment
+    const progressController = require("../controllers/progressController");
+    await progressController.initializeProgress(student._id, course._id);
+
     res.status(201).json({
       message: "Student enrolled successfully",
       enrollment: newEnrollment,
@@ -206,7 +211,6 @@ const enrollInCourse = async (req, res) => {
       .json({ message: "Internal Server Error", error: error.message });
   }
 };
-
 
 // Access Course Content (Only Enrolled Students)
 const getCourseContent = async (req, res) => {
