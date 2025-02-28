@@ -361,85 +361,89 @@ exports.getAllProgress = async (req, res) => {
   }
 };
 
+
 // Helper method to recalculate overall progress
 exports.recalculateProgress = async (progress) => {
   try {
     const { content_weight, quiz_weight } = progress.overall_progress;
+    let totalProgress = 0;
 
-    // Calculate content progress
-    let contentProgressSum = 0;
-    let completedContentCount = 0;
-
+    // Calculate content progress if content exists
     if (progress.content_progress.length > 0) {
+      let contentProgressSum = 0;
+      let completedContentCount = 0;
+
       progress.content_progress.forEach((item) => {
-        contentProgressSum += item.percentage_completed;
-        if (item.percentage_completed >= 90) {
+        // Ensure percentage_completed is a valid number
+        const validPercentage = isNaN(item.percentage_completed) ? 0 : item.percentage_completed;
+        contentProgressSum += validPercentage;
+        
+        if (validPercentage >= 90) {
           completedContentCount++;
         }
       });
 
-      // Average content progress as percentage
-      const avgContentProgress =
-        progress.content_progress.length > 0
-          ? contentProgressSum / progress.content_progress.length
-          : 0;
+      // Average content progress as percentage (prevent division by zero)
+      const avgContentProgress = contentProgressSum / progress.content_progress.length;
+      
+      // Apply content weight (ensure it's a valid number)
+      const weightedContentProgress = (avgContentProgress * content_weight) / 100;
 
-      // Apply content weight
-      const weightedContentProgress =
-        (avgContentProgress * content_weight) / 100;
+      // Initialize quiz progress variables
+      let quizProgressSum = 0;
+      let attemptedQuizCount = 0;
 
-      // Calculate quiz progress
+      // Calculate quiz progress if quizzes exist
+      if (progress.quiz_progress.length > 0) {
+        progress.quiz_progress.forEach((item) => {
+          if (item.attempted) {
+            // Ensure score is a valid number
+            const validScore = isNaN(item.score) ? 0 : item.score;
+            quizProgressSum += validScore;
+            attemptedQuizCount++;
+          }
+        });
+
+        // Average quiz progress (prevent division by zero)
+        const avgQuizProgress = attemptedQuizCount > 0 ? 
+          quizProgressSum / progress.quiz_progress.length : 0;
+
+        // Apply quiz weight
+        const weightedQuizProgress = (avgQuizProgress * quiz_weight) / 100;
+
+        // Calculate total progress (weighted sum)
+        totalProgress = weightedContentProgress + weightedQuizProgress;
+      } else {
+        // No quizzes, total progress is just from content
+        totalProgress = weightedContentProgress;
+      }
+    } else if (progress.quiz_progress.length > 0) {
+      // No content, only quizzes exist
       let quizProgressSum = 0;
       let attemptedQuizCount = 0;
 
       progress.quiz_progress.forEach((item) => {
         if (item.attempted) {
-          quizProgressSum += item.score;
+          // Ensure score is a valid number
+          const validScore = isNaN(item.score) ? 0 : item.score;
+          quizProgressSum += validScore;
           attemptedQuizCount++;
         }
       });
 
-      // Average quiz progress as percentage
-      const avgQuizProgress =
-        progress.quiz_progress.length > 0 && attemptedQuizCount > 0
-          ? quizProgressSum / progress.quiz_progress.length
-          : 0;
+      // Average quiz progress (prevent division by zero)
+      const avgQuizProgress = attemptedQuizCount > 0 ? 
+        quizProgressSum / progress.quiz_progress.length : 0;
 
-      // Apply quiz weight
-      const weightedQuizProgress = (avgQuizProgress * quiz_weight) / 100;
-
-      // Calculate total progress (weighted sum)
-      progress.overall_progress.total_progress = Math.round(
-        weightedContentProgress + weightedQuizProgress
-      );
-      progress.overall_progress.last_updated = new Date();
-
-      await progress.save();
-    } else {
-      // If there's no content, just calculate based on quizzes
-      let quizProgressSum = 0;
-      let attemptedQuizCount = 0;
-
-      progress.quiz_progress.forEach((item) => {
-        if (item.attempted) {
-          quizProgressSum += item.score;
-          attemptedQuizCount++;
-        }
-      });
-
-      // Average quiz progress as percentage
-      const avgQuizProgress =
-        progress.quiz_progress.length > 0 && attemptedQuizCount > 0
-          ? quizProgressSum / progress.quiz_progress.length
-          : 0;
-
-      // Since there's no content, quiz weight should be 100%
-      progress.overall_progress.total_progress = Math.round(avgQuizProgress);
-      progress.overall_progress.last_updated = new Date();
-
-      await progress.save();
+      // Since there's no content, quiz should be 100% of the weight
+      totalProgress = avgQuizProgress;
     }
 
+    // Ensure totalProgress is a valid number before saving
+    progress.overall_progress.total_progress = isNaN(totalProgress) ? 0 : Math.round(totalProgress);
+    progress.overall_progress.last_updated = new Date();
+
+    await progress.save();
     return progress;
   } catch (error) {
     console.error("Error recalculating progress:", error);

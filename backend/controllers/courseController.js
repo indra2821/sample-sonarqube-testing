@@ -1,10 +1,9 @@
 const Enrollment = require("../models/Enrollment.js");
-
-// Create Course (Instructor Only)
 const Content = require("../models/Content.js");
 const User = require("../models/userModel.js");
 const Course = require("../models/Course.js");
 
+// Create Course (Instructor Only)
 const createCourse = async (req, res) => {
   try {
     const { name, instructor, instructor_email, content_Arr } = req.body;
@@ -146,30 +145,36 @@ const deleteCourse = async (req, res) => {
   }
 };
 
-// Enroll in Course
-// Enroll in Course (with progress initialization)
+// FIXED: Improved enrollInCourse function
 const enrollInCourse = async (req, res) => {
   try {
     const { id } = req.params; // Course ID from URL
-    const studentEmail = req.user.email; // Get email from logged-in user
 
-    if (!id) {
-      return res.status(400).json({ message: "Course ID is required" });
+    // Debug information
+    console.log("Authentication info:", req.user);
+
+    if (!req.user || !req.user._id) {
+      return res
+        .status(401)
+        .json({ message: "User not authenticated properly" });
     }
 
-    // Find student by email
-    const student = await User.findOne({
-      email: studentEmail,
-      role: "Student",
-    });
+    const userId = req.user._id;
+
+    // Find the authenticated user by ID instead of email and role
+    const student = await User.findById(userId);
 
     if (!student) {
-      return res.status(404).json({ message: "Student not found" });
+      return res.status(404).json({
+        message: "Student not found",
+        userId: userId,
+      });
     }
 
-    // Find course by ID
-    const course = await Course.findById(id);
+    console.log("Found student:", student.name, student.email, student.role);
 
+    // Check if course exists
+    const course = await Course.findById(id);
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
@@ -196,12 +201,19 @@ const enrollInCourse = async (req, res) => {
 
     await newEnrollment.save();
 
-    // Initialize progress tracking for this enrollment
-    const progressController = require("../controllers/progressController");
-    await progressController.initializeProgress(student._id, course._id);
+    // Initialize progress tracking if the function exists
+    try {
+      const progressController = require("../controllers/progressController");
+      if (typeof progressController.initializeProgress === "function") {
+        await progressController.initializeProgress(student._id, course._id);
+      }
+    } catch (error) {
+      console.warn("Progress initialization skipped:", error.message);
+      // Continue with enrollment even if progress initialization fails
+    }
 
     res.status(201).json({
-      message: "Student enrolled successfully",
+      message: "Enrollment successful",
       enrollment: newEnrollment,
     });
   } catch (error) {
@@ -220,10 +232,10 @@ const getCourseContent = async (req, res) => {
 
     console.log(`Checking enrollment for User: ${userId}, Course: ${id}`);
 
-    // Ensure user and course IDs are stored properly in Enrollment collection
+    // Updated query to match Enrollment schema structure
     const isEnrolled = await Enrollment.findOne({
-      user: userId,
-      course: id,
+      user_id: userId, // Changed from user to user_id to match your schema
+      course_id: id, // Changed from course to course_id to match your schema
     }).lean();
 
     if (!isEnrolled) {
