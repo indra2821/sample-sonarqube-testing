@@ -35,8 +35,8 @@ exports.initializeProgress = async (userId, courseId) => {
 
     if (quizzes.length > 0 && contentItems.length > 0) {
       // If both quizzes and content exist, assign weights
-      contentWeight = 70;
-      quizWeight = 30;
+      contentWeight = 60;
+      quizWeight = 40;
     } else if (quizzes.length > 0 && contentItems.length === 0) {
       // Only quizzes exist
       contentWeight = 0;

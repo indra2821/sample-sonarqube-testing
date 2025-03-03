@@ -13,6 +13,9 @@ const {
   deleteCourse,
   enrollInCourse,
   getCourseContent,
+  addBookmark,
+  removeBookmark,
+  getBookmarkedCourses,
 } = require("../controllers/courseController");
 
 const router = express.Router();
@@ -26,6 +29,9 @@ const requiredHandlers = [
   deleteCourse,
   enrollInCourse,
   getCourseContent,
+  addBookmark,
+  removeBookmark,
+  getBookmarkedCourses,
 ];
 
 if (requiredHandlers.some((handler) => typeof handler !== "function")) {
@@ -36,6 +42,7 @@ if (requiredHandlers.some((handler) => typeof handler !== "function")) {
 
 // Public Routes
 router.get("/", getCourses);
+router.get("/bookmarked", authenticateUser, getBookmarkedCourses);
 router.get("/:id", getCourseById);
 
 // Instructor-Only Routes
@@ -46,5 +53,9 @@ router.delete("/:id", authenticateUser, isInstructor, deleteCourse);
 // Student-Only Routes
 router.post("/:id/enroll", authenticateUser, enrollInCourse);
 router.get("/:id/content", authenticateUser, getCourseContent);
+
+// Bookmark Routes
+router.post("/:id/bookmark", authenticateUser, addBookmark);
+router.delete("/:id/bookmark", authenticateUser, removeBookmark);
 
 module.exports = router;

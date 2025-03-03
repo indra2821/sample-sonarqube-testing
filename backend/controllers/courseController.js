@@ -145,7 +145,7 @@ const deleteCourse = async (req, res) => {
   }
 };
 
-// FIXED: Improved enrollInCourse function
+//enrollInCourse function
 const enrollInCourse = async (req, res) => {
   try {
     const { id } = req.params; // Course ID from URL
@@ -254,6 +254,99 @@ const getCourseContent = async (req, res) => {
   }
 };
 
+
+// Add course to user's bookmarks
+const addBookmark = async (req, res) => {
+  try {
+    const { id } = req.params; // Course ID
+    const userId = req.user._id;
+
+    // Check if course exists
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Find user and update bookmarks
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if already bookmarked
+    if (user.bookmarked_courses.includes(id)) {
+      return res.status(400).json({ message: "Course already bookmarked" });
+    }
+
+    // Add to bookmarks
+    user.bookmarked_courses.push(id);
+    await user.save();
+
+    res.status(200).json({ 
+      message: "Course added to bookmarks successfully",
+      bookmarked_courses: user.bookmarked_courses
+    });
+  } catch (error) {
+    console.error("Error adding bookmark:", error);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+// Remove course from user's bookmarks
+const removeBookmark = async (req, res) => {
+  try {
+    const { id } = req.params; // Course ID
+    const userId = req.user._id;
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if course is bookmarked
+    if (!user.bookmarked_courses.includes(id)) {
+      return res.status(400).json({ message: "Course not in bookmarks" });
+    }
+
+    // Remove from bookmarks
+    user.bookmarked_courses = user.bookmarked_courses.filter(
+      courseId => courseId.toString() !== id
+    );
+    await user.save();
+
+    res.status(200).json({ 
+      message: "Course removed from bookmarks successfully",
+      bookmarked_courses: user.bookmarked_courses
+    });
+  } catch (error) {
+    console.error("Error removing bookmark:", error);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+// Get all bookmarked courses for a user
+const getBookmarkedCourses = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Find user and populate bookmarked courses
+    const user = await User.findById(userId).populate({
+      path: 'bookmarked_courses',
+      populate: { path: 'instructor', select: 'name email' }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user.bookmarked_courses);
+  } catch (error) {
+    console.error("Error getting bookmarked courses:", error);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
 module.exports = {
   createCourse,
   getCourses,
@@ -262,4 +355,7 @@ module.exports = {
   deleteCourse,
   enrollInCourse,
   getCourseContent,
+  addBookmark,
+  removeBookmark,
+  getBookmarkedCourses,
 };
