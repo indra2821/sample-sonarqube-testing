@@ -50,11 +50,11 @@ const QuizProgressSchema = new mongoose.Schema({
 const OverallProgressSchema = new mongoose.Schema({
   content_weight: {
     type: Number,
-    default: 70,
+    default: 60,
   },
   quiz_weight: {
     type: Number,
-    default: 30,
+    default: 40,
   },
   total_progress: {
     type: Number,

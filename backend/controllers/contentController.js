@@ -1,6 +1,7 @@
 const Content = require("../models/Content");
 const Course = require("../models/Course");
 const path = require("path");
+const fs = require("fs").promises;
 
 // Helper function to convert file path to URL
 const pathToUrl = (filePath) => {
@@ -62,7 +63,25 @@ const uploadContent = async (req, res) => {
 
     const savedContent = await content.save();
 
-    // Return the saved content
+    // Find the course and update its content_Arr
+    const course = await Course.findById(course_id);
+    if (!course) {
+      // If course not found, delete the uploaded content
+      await content.deleteOne();
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Check if the content is already in the course's content_Arr
+    const contentExists = course.content_Arr.some(
+      (contentId) => contentId.toString() === savedContent._id.toString()
+    );
+
+    if (!contentExists) {
+      // Add the new content ID to the course's content_Arr
+      course.content_Arr.push(savedContent._id);
+      await course.save();
+    }
+
     res.status(201).json(savedContent);
   } catch (error) {
     console.error("Upload error:", error);
@@ -124,7 +143,14 @@ const deleteContent = async (req, res) => {
     );
     await course.save();
 
-    // Delete the content
+    // Delete the file from the server
+    try {
+      await fs.unlink(path.join(__dirname, "..", content.url));
+    } catch (fileError) {
+      console.warn("Could not delete file:", fileError);
+    }
+
+    // Delete the content from database
     await content.deleteOne();
 
     res.status(200).json({ message: "Content deleted successfully" });
@@ -165,6 +191,13 @@ const updateContent = async (req, res) => {
 
     // Handle file update if provided
     if (req.file) {
+      // Delete old file
+      try {
+        await fs.unlink(path.join(__dirname, "..", content.url));
+      } catch (fileError) {
+        console.warn("Could not delete old file:", fileError);
+      }
+
       const relativePath = pathToUrl(req.file.path);
       content.url = relativePath;
       content.full_url = createFullUrl(req, relativePath);

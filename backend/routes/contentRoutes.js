@@ -23,15 +23,14 @@ const router = express.Router();
 const isInstructor = authorizeRole("Instructor");
 
 // Upload content route (Instructor only + course ownership check)
-// IMPORTANT: Move verifyCourseOwnership AFTER uploadSingle so req.body is populated
 router.post(
   "/upload",
   authenticateUser,
   isInstructor,
-  uploadSingle,
-  handleUploadError,
-  verifyCourseOwnership, // Moved after upload middleware
-  uploadContent
+  uploadSingle, 
+  handleUploadError, 
+  verifyCourseOwnership, 
+  uploadContent 
 );
 
 // Get all content for a course (any authenticated user can view)
@@ -63,7 +62,7 @@ router.delete(
   deleteContent
 );
 
-// Update content
+// Update content route
 router.put(
   "/:content_id",
   authenticateUser,
@@ -87,7 +86,7 @@ router.put(
   },
   uploadSingle,
   handleUploadError,
-  verifyCourseOwnership, // Moved after upload middleware
+  verifyCourseOwnership,
   updateContent
 );
 

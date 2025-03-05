@@ -361,7 +361,6 @@ exports.getAllProgress = async (req, res) => {
   }
 };
 
-
 // Helper method to recalculate overall progress
 exports.recalculateProgress = async (progress) => {
   try {
@@ -375,19 +374,23 @@ exports.recalculateProgress = async (progress) => {
 
       progress.content_progress.forEach((item) => {
         // Ensure percentage_completed is a valid number
-        const validPercentage = isNaN(item.percentage_completed) ? 0 : item.percentage_completed;
+        const validPercentage = isNaN(item.percentage_completed)
+          ? 0
+          : item.percentage_completed;
         contentProgressSum += validPercentage;
-        
+
         if (validPercentage >= 90) {
           completedContentCount++;
         }
       });
 
       // Average content progress as percentage (prevent division by zero)
-      const avgContentProgress = contentProgressSum / progress.content_progress.length;
-      
+      const avgContentProgress =
+        contentProgressSum / progress.content_progress.length;
+
       // Apply content weight (ensure it's a valid number)
-      const weightedContentProgress = (avgContentProgress * content_weight) / 100;
+      const weightedContentProgress =
+        (avgContentProgress * content_weight) / 100;
 
       // Initialize quiz progress variables
       let quizProgressSum = 0;
@@ -405,8 +408,10 @@ exports.recalculateProgress = async (progress) => {
         });
 
         // Average quiz progress (prevent division by zero)
-        const avgQuizProgress = attemptedQuizCount > 0 ? 
-          quizProgressSum / progress.quiz_progress.length : 0;
+        const avgQuizProgress =
+          attemptedQuizCount > 0
+            ? quizProgressSum / progress.quiz_progress.length
+            : 0;
 
         // Apply quiz weight
         const weightedQuizProgress = (avgQuizProgress * quiz_weight) / 100;
@@ -432,15 +437,19 @@ exports.recalculateProgress = async (progress) => {
       });
 
       // Average quiz progress (prevent division by zero)
-      const avgQuizProgress = attemptedQuizCount > 0 ? 
-        quizProgressSum / progress.quiz_progress.length : 0;
+      const avgQuizProgress =
+        attemptedQuizCount > 0
+          ? quizProgressSum / progress.quiz_progress.length
+          : 0;
 
       // Since there's no content, quiz should be 100% of the weight
       totalProgress = avgQuizProgress;
     }
 
     // Ensure totalProgress is a valid number before saving
-    progress.overall_progress.total_progress = isNaN(totalProgress) ? 0 : Math.round(totalProgress);
+    progress.overall_progress.total_progress = isNaN(totalProgress)
+      ? 0
+      : Math.round(totalProgress);
     progress.overall_progress.last_updated = new Date();
 
     await progress.save();

@@ -6,59 +6,78 @@ const Course = require("../models/Course.js");
 // Create Course (Instructor Only)
 const createCourse = async (req, res) => {
   try {
-    const { name, instructor, instructor_email, content_Arr } = req.body;
+    const { name, content_Arr } = req.body;
 
-    if (!name || !instructor || !instructor_email || !content_Arr) {
-      return res.status(400).json({ message: "All fields are required" });
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({ message: "Course name is required" });
     }
 
-    // Find instructor by name
-    const instructorData = await User.findOne({
-      name: instructor,
-      role: "Instructor",
-    });
+    // Extract user information from the token
+    const userId = req.user._id;
+    const userRole = req.user.role;
+
+    // Validate instructor
+    if (userRole !== "Instructor") {
+      return res.status(403).json({ message: "Only instructors can create courses" });
+    }
+
+    // Find the full user details to get email and name
+    const instructorData = await User.findById(userId);
 
     if (!instructorData) {
       return res.status(404).json({ message: "Instructor not found" });
     }
 
-    // Create the course first without content_Arr
+    // Create the course
     const newCourse = new Course({
       name,
-      instructor: instructorData._id,
-      instructor_email,
+      instructor: userId,
+      instructor_email: instructorData.email,
       content_Arr: [],
     });
 
     await newCourse.save();
 
-    // Save content items and get their ObjectIds
-    const contentIds = await Promise.all(
-      content_Arr.map(async (content) => {
-        const newContent = new Content({
-          title: content.title,
-          description: content.description,
-          duration: content.duration,
-          url: content.url || "https://example.com/default-url", // Ensure URL exists
-          course_id: newCourse._id, //
-          uploaded_by: instructorData._id,
-        });
+    // Optional: Handle content creation if content_Arr is provided
+    if (content_Arr && content_Arr.length > 0) {
+      const contentIds = await Promise.all(
+        content_Arr.map(async (content) => {
+          const newContent = new Content({
+            title: content.title,
+            description: content.description,
+            duration: content.duration || 0,
+            url: content.url || "https://example.com/default-url",
+            full_url: content.url || "https://example.com/default-url",
+            course_id: newCourse._id,
+            uploaded_by: userId,
+            file_type: content.file_type || "other"
+          });
 
-        const savedContent = await newContent.save();
-        return savedContent._id;
-      })
-    );
+          const savedContent = await newContent.save();
+          return savedContent._id;
+        })
+      );
 
-    // Update the course with content ObjectIds
-    newCourse.content_Arr = contentIds;
-    await newCourse.save();
+      // Update the course with content ObjectIds
+      newCourse.content_Arr = contentIds;
+      await newCourse.save();
+    }
 
-    res
-      .status(201)
-      .json({ message: "Course created successfully", course: newCourse });
+    res.status(201).json({
+      message: "Course created successfully", 
+      course: {
+        _id: newCourse._id,
+        name: newCourse.name,
+        instructor_id: newCourse.instructor,
+        instructor_name: instructorData.name,
+        instructor_email: newCourse.instructor_email,
+        content_Arr: newCourse.content_Arr
+      }
+    });
   } catch (error) {
     console.error("Error creating course:", error);
-    res.status(500).json({ message: "Internal Server Error", error });
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 };
 
