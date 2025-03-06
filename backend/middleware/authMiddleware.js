@@ -28,5 +28,6 @@ const authorizeRole = (role) => {
     next();
   };
 };
+const { authenticateUser: protect } = require("../middleware/authMiddleware");
 
 module.exports = { authenticateUser, authorizeRole };

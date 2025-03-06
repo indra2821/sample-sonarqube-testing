@@ -28,7 +28,8 @@ app.use("/api/courses", require("./routes/courseRoutes"));
 app.use("/api/enrollment", require("./routes/enrollmentRoutes"));
 app.use("/api/quiz", require("./routes/quizRoutes"));
 app.use("/api/content", require("./routes/contentRoutes"));
-app.use("/api/progress", require("./routes/progressRoutes")); // Add progress routes
+app.use("/api/progress", require("./routes/progressRoutes"));
+app.use("/api/certificates", require("./routes/certificateRoutes")); // Add certificates routes
 
 app.get("/", (req, res) => {
   res.send("API is running...");
