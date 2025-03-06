@@ -6,6 +6,8 @@ const {
   getProgressByCourse,
   getAllProgress,
   getInstructorProgressStats,
+  markContentComplete,
+  updateVideoProgress,
 } = require("../controllers/progressController");
 const {
   authenticateUser,
@@ -14,11 +16,14 @@ const {
 
 // Student-only routes (require authentication)
 router.put("/content/:contentId", authenticateUser, updateContentProgress);
-
+router.put(
+  "/content/:contentId/complete",
+  authenticateUser,
+  markContentComplete
+);
+router.put("/video/:contentId", authenticateUser, updateVideoProgress);
 router.put("/quiz/:quizId", authenticateUser, updateQuizProgress);
-
 router.get("/course/:courseId", authenticateUser, getProgressByCourse);
-
 router.get("/all", authenticateUser, getAllProgress);
 
 // Instructor-only routes
