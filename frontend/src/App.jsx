@@ -1,27 +1,30 @@
-/* eslint-disable no-unused-vars */
-//import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./Components/Navbar";
 
-import { DashboardLayout } from "@toolpad/core/DashboardLayout";
-import DrawerAppBar from "./Components/DrawerAppBar";
-import DashboardLayoutBasic from "./Components/DashboardLayoutBasic";
-import Dashboard from "./Components/Dashboard";
-import Navbar from "./Components/NavBar";
-import ElevateAppBar from "./Components/ElevateAppBar";
+const Home = () => <h1 className="text-center mt-10">Home Page</h1>;
+const About = () => <h1 className="text-center mt-10">About Us</h1>;
+const Courses = () => <h1 className="text-center mt-10">Courses</h1>;
+const Instructors = () => <h1 className="text-center mt-10">Instructors</h1>;
+const Events = () => <h1 className="text-center mt-10">Events</h1>;
+const Contact = () => <h1 className="text-center mt-10">Contact Us</h1>;
+const Login = () => <h1 className="text-center mt-10">Login Page</h1>;
+const Signup = () => <h1 className="text-center mt-10">Sign Up Page</h1>;
 
 function App() {
-  //const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        {/* <DrawerAppBar /> */}
-        {/* <DashboardLayoutBasic /> */}
-
-        {/* <ElevateAppBar /> */}
-
-        <Dashboard />
-      </div>
-    </>
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/aboutus" element={<About />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/instructors" element={<Instructors />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/contactus" element={<Contact />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+      </Routes>
+    </Router>
   );
 }
 
