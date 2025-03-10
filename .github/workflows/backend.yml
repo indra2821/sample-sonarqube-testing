@@ -9,16 +9,7 @@ jobs:
 
     steps:
 
-      - name: Set up SSH key for GitHub Actions
-        run: |
-          if [ ! -d "$HOME/.ssh" ]; then mkdir -p ~/.ssh; fi
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa-Adi
-          chown -R $USER:$USER ~/.ssh
-          chmod 600 ~/.ssh/id_rsa-Adi
-          chmod 700 ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa-Adi
+      
 
       - name: Checkout repository
         uses: actions/checkout@v4
