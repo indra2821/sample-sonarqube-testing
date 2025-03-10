@@ -17,6 +17,8 @@ jobs:
           chmod 600 ~/.ssh/id_rsa-Adi
           chmod 700 ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa-Adi
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,7 +33,7 @@ jobs:
         run: |
           echo "Pulling latest code for backend" 
         
-          git fetch --all &&
-          git pull origin main &&
+          
+          git pull 
           npm install &&
           pm2 restart index.js --name "edumosaic-backend"
