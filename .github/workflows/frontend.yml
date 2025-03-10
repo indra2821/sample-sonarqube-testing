@@ -37,6 +37,8 @@ jobs:
         run: |
           npm -f install
           npm run build
+      - name: List Build Directory
+        run: ls -la frontend/build
 
       - name: Deploy to Production
         run: |
