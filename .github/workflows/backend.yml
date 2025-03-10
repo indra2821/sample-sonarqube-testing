@@ -8,6 +8,16 @@ jobs:
     runs-on: [self-hosted, edumosaic-backend]  
 
     steps:
+
+      - name: Set up SSH key for GitHub Actions
+        run: |
+          if [ ! -d "$HOME/.ssh" ]; then mkdir -p ~/.ssh; fi
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa-Adi
+          sudo chown -R $USER:$USER ~/.ssh
+          sudo chmod 600 ~/.ssh/id_rsa-Adi
+          sudo chmod 700 ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
