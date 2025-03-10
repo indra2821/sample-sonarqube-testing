@@ -27,7 +27,7 @@ jobs:
 
       - name: Check package.json location
         run: |
-          if [ ! -f "$GITHUB_WORKSPACE/client/package.json" ]; then
+          if [ ! -f "$GITHUB_WORKSPACE/frontend/package.json" ]; then
             echo "Error: package.json not found in $GITHUB_WORKSPACE/frontend"
             exit 1
           fi
