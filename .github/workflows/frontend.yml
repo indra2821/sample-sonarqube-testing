@@ -37,12 +37,11 @@ jobs:
         run: |
           npm -f install
           npm run build
-      - name: List Build Directory
-        run: ls -la frontend/build
+      
 
       - name: Deploy to Production
         run: |
-           rsync -avz --delete --ignore-existing $GITHUB_WORKSPACE/frontend/build/ /var/www/projects/eq-aditya-j-mern-stack-internship-2025/frontend/build/
+           rsync -avz --delete --ignore-existing $GITHUB_WORKSPACE/frontend/dist/ /var/www/projects/eq-aditya-j-mern-stack-internship-2025/frontend/dist/
 
       - name: Cleanup Workspace
         run: |
