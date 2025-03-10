@@ -33,7 +33,7 @@ jobs:
           fi
 
       - name: Install Dependencies & Build
-        working-directory: client
+        working-directory: frontend
         run: |
           npm -f install
           npm run build
