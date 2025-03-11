@@ -24,6 +24,5 @@ jobs:
         working-directory: /var/www/projects/eq-aditya-j-mern-stack-internship-2025/backend/
         run: |
           echo "Pulling latest code for backend"
-          git config --global --add safe.directory /var/www/projects/eq-aditya-j-mern-stack-internship-2025/backend
-          git pull
+     
           npm install && pm2 restart edumosaic-backend
