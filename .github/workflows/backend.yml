@@ -11,18 +11,28 @@ jobs:
 
 
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js 
         uses: actions/setup-node@v3
         with:
           node-version: '23'
 
+      - name: Set up SSH key for GitHub Actions
+        run: |
+          if [ ! -d "$HOME/.ssh" ]; then mkdir -p ~/.ssh; fi
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa-Adi
+          sudo chown -R $USER:$USER ~/.ssh
+          sudo chmod 600 ~/.ssh/id_rsa-Adi
+          sudo chmod 700 ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
       - name: Pull and Deploy Backend
         working-directory: /var/www/projects/eq-aditya-j-mern-stack-internship-2025/backend/
         run: |
           echo "Pulling latest code for backend" 
+        
           
-          git pull &&
+          git pull 
           npm install &&
           pm2 restart edumosaic-backend
