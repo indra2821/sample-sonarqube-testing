@@ -22,8 +22,7 @@ jobs:
         working-directory: /var/www/projects/eq-aditya-j-mern-stack-internship-2025/backend/
         run: |
           echo "Pulling latest code for backend" 
-        
-          git fetch --all &&
-          git pull origin main &&
+          
+          git pull &&
           npm install &&
           pm2 restart edumosaic-backend
