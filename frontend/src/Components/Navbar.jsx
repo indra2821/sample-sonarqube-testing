@@ -10,16 +10,16 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Toggle Light/Dark Mode with force update
+  
   useEffect(() => {
-    // Apply changes to HTML element for Tailwind dark mode
+    
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
-      document.body.style.backgroundColor = "#000814"; // Dark mode color
+      document.body.style.backgroundColor = "#000814";
       localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
-      document.body.style.backgroundColor = "#f2e9e4"; // Light mode color
+      document.body.style.backgroundColor = "#f2e9e4";
       localStorage.setItem("theme", "light");
     }
     window.dispatchEvent(new Event("theme-change"));
@@ -54,7 +54,7 @@ const Navbar = () => {
     { name: "Login", path: "/login" },
   ];
 
-  // Determine current background color based on mode
+  
   const navBgColor = isDarkMode ? "#000814" : "#f2e9e4";
   const textColor = isDarkMode ? "text-blue-300" : "text-blue-500";
 

@@ -1,0 +1,103 @@
+/* Import Tailwind's preflight styles */
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+/* Define CSS variables in :root */
+/* Default light mode */
+:root {
+  --primary: #05668D;
+  --primary-hover: #F77F00;
+  --bg-light: #f2e9e4;
+  --bg-dark: #000814;
+  --text-light-primary: #1F2937;
+  --text-light-secondary: #4B5563;
+  --text-dark-primary: #FFFFFF;
+  --text-dark-secondary: #D1D5DB;
+  --border-light: #E5E7EB;
+  --border-dark: #374151;
+  --input-light: #FFFFFF;
+  --input-dark: #1F2937;
+}
+
+/* Dark mode */
+.dark {
+  --bg-light: #000814; /* Background should stay dark */
+  --bg-dark: #f2e9e4; /* Light background */
+  --text-light-primary: #1F2937; /* Should be used in light mode */
+  --text-dark-primary: #FFFFFF; /* Ensure text is white in dark mode */
+  --text-light-secondary: #4B5563; /* Lighter text in light mode */
+  --text-dark-secondary: #D1D5DB; /* Lighter text in dark mode */
+}
+
+
+
+/* Theme utilities */
+@layer utilities {
+  /* Theme-aware background classes */
+  .bg-theme {
+    background-color: var(--bg-light);
+    transition: background-color 0.3s ease-in-out;
+  }
+  .dark .bg-theme {
+    background-color: var(--bg-dark);
+  }
+
+  /* Theme-aware text classes */
+  .text-theme-primary {
+  color: var(--text-light-primary);
+  transition: color 0.3s ease-in-out;
+}
+  .dark .text-theme-primary {
+  color: var(--text-dark-primary);
+}
+  
+ .text-theme-secondary {
+  color: var(--text-light-secondary);
+  transition: color 0.3s ease-in-out;
+}
+  .dark .text-theme-secondary {
+  color: var(--text-dark-secondary);
+}
+
+  /* Theme-aware border classes */
+  .border-theme {
+    border-color: var(--border-light);
+    transition: border-color 0.3s ease-in-out;
+  }
+  .dark .border-theme {
+    border-color: var(--border-dark);
+  }
+
+  /* Theme-aware input classes */
+  .input-theme {
+    background-color: var(--input-light);
+    border-color: var(--border-light);
+    color: var(--text-light-primary);
+    transition: all 0.3s ease-in-out;
+  }
+  .dark .input-theme {
+    background-color: var(--input-dark);
+    border-color: var(--border-dark);
+    color: var(--text-dark-primary);
+  }
+
+  /* Button styles */
+  .btn-primary {
+    background-color: var(--primary);
+    color: white;
+    transition: background-color 0.3s ease-in-out;
+  }
+  .btn-primary:hover {
+    background-color: var(--primary-hover);
+  }
+
+  .btn-secondary {
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+  .btn-secondary:hover {
+    background-color: var(--primary);
+    color: white;
+  }
+}

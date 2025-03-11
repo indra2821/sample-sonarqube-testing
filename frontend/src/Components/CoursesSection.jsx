@@ -1,9 +1,25 @@
-import { useEffect, useRef } from "react";
-import PropTypes from "prop-types"; 
+import { useEffect, useRef, useState } from "react";
 import { FaArrowRightLong } from "react-icons/fa6";
 
-const CoursesSection = ({ isDarkMode }) => {
+const CoursesSection = () => {
   const carouselRef = useRef(null);
+  const [isDarkMode, setIsDarkMode] = useState(
+    document.documentElement.classList.contains("dark")
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDarkMode(document.documentElement.classList.contains("dark"));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   let isDragging = false,
     startX,
     scrollLeft;
@@ -26,7 +42,6 @@ const CoursesSection = ({ isDarkMode }) => {
     isDragging = false;
   };
 
-  
   useEffect(() => {
     const carousel = carouselRef.current;
     let scrollAmount = 1;
@@ -46,9 +61,19 @@ const CoursesSection = ({ isDarkMode }) => {
 
   return (
     <div
-      className={`py-12 ${isDarkMode ? "bg-[#000814] text-white" : "bg-[#f2e9e4] text-gray-900"}`}
+      className={`py-12 transition-all duration-300 ${
+        isDarkMode ? "bg-[#000814] text-white" : "bg-[#f2e9e4] text-gray-900"
+      }`}
     >
-      <h2 className="text-3xl font-bold text-center mb-6">Our Courses</h2>
+      {/* 🔹 Title Section */}
+      <div className="text-center mb-10">
+        <p className="text-2xl text-grey-600 font-semibold">Our Courses</p>
+        <h2 className="text-5xl font-bold mt-2">
+          Fostering a playful & engaging learning environment
+        </h2>
+      </div>
+
+      {/*  Courses Carousel */}
       <div
         className="relative overflow-hidden"
         onMouseDown={startDragging}
@@ -58,23 +83,24 @@ const CoursesSection = ({ isDarkMode }) => {
       >
         <div
           ref={carouselRef}
-          className="flex space-x-6 overflow-x-auto scrollbar-hide whitespace-nowrap cursor-grab"
+          className="flex space-x-6 overflow-x-auto scrollbar-hide whitespace-nowrap cursor-grab h-[280px] pb-4"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {[...Array(8)].map((_, index) => (
             <div
               key={index}
-              className={`w-80 p-6 rounded-lg shadow-lg flex-shrink-0 ${
+              className={`w-96 h-60 p-8 rounded-xl shadow-lg flex-shrink-0 ${
                 index % 2 === 0
                   ? "bg-[#F77F00] text-white"
                   : "bg-[#05668D] text-white"
               }`}
             >
-              <h3 className="text-xl font-semibold">Course {index + 1}</h3>
-              <p className="text-sm mt-2">
+              <h3 className="text-2xl font-semibold">Course {index + 1}</h3>
+              <p className="text-base mt-3">
                 Learn the fundamentals of this course.
               </p>
-              <button className="mt-4 bg-white text-black p-2 rounded-full hover:bg-gray-300 transition">
-                <FaArrowRightLong className="text-lg" />
+              <button className="mt-5 bg-white text-black p-3 rounded-full hover:bg-gray-300 transition">
+                <FaArrowRightLong className="text-xl" />
               </button>
             </div>
           ))}
@@ -82,11 +108,6 @@ const CoursesSection = ({ isDarkMode }) => {
       </div>
     </div>
   );
-};
-
-
-CoursesSection.propTypes = {
-  isDarkMode: PropTypes.bool.isRequired,
 };
 
 export default CoursesSection;

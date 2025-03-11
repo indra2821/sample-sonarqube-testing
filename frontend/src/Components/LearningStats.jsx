@@ -1,25 +1,8 @@
-import { useEffect, useState } from "react";
-
 const LearningStats = () => {
-  // State to track dark mode
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  // Check dark mode from local storage or system preference
-  useEffect(() => {
-    const darkModeEnabled =
-      localStorage.getItem("theme") === "dark" ||
-      window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setIsDarkMode(darkModeEnabled);
-  }, []);
-
   return (
-    <div
-      className={`w-full pt-20 transition-all duration-300 ${
-        isDarkMode ? "bg-[#000814] text-white" : "bg-[#f2e9e4] text-gray-900"
-      }`}
-    >
-      {/* Section 1: Stats */}
-      <section className="w-full py-12">
+    <>
+      {/* Existing LearningStats Section */}
+      <section className="w-full py-12 bg-[var(--primary)] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -28,22 +11,17 @@ const LearningStats = () => {
               { value: "54K+", label: "Online Courses" },
               { value: "80K+", label: "Worldwide Members" },
             ].map((stat, index) => (
-              <div
-                key={index}
-                className="border-r last:border-0 border-gray-300 dark:border-gray-600"
-              >
+              <div key={index} className="border-r last:border-0 border-white">
                 <h2 className="text-4xl font-bold mb-2">{stat.value}</h2>
-                <p className="text-lg text-gray-700 dark:text-gray-300">
-                  {stat.label}
-                </p>
+                <p className="text-lg">{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Section 2: Hero Text and Description */}
-      <section className="py-16">
+      {/* New Section from the Image */}
+      <section className="py-16 bg-bg-light dark:bg-bg-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             {/* Left Content */}
@@ -51,23 +29,19 @@ const LearningStats = () => {
               <p className="text-green-500 font-semibold uppercase">
                 Who We Are
               </p>
-              <h2 className="text-4xl font-bold mt-2 text-gray-900 dark:text-white">
+              <h2 className="text-4xl font-bold text-text-light-primary dark:text-white mt-2">
                 Your Online Learning Partner
               </h2>
-              <p className="mt-4 text-gray-700 dark:text-gray-300">
+              <p className="text-text-light-secondary dark:text-gray-300 mt-4">
                 Egestas faucibus nisl et ultricies. Tempus lectus condimentum
                 tristique mauris id vitae. Id pulvinar a eget vitae pellentesque
                 ridiculus platea. Vulputate cursus.
               </p>
             </div>
 
-            {/* Right Content: Video Course */}
-            <div
-              className={`p-6 rounded-lg shadow-md ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
-              }`}
-            >
-              <h3 className="text-xl font-bold">
+            {/* Right Content - Video Course Card */}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+              <h3 className="text-xl font-bold text-text-light-primary dark:text-white">
                 Video Course <span className="text-gray-500">(1/110)</span>
               </h3>
               <div className="mt-4">
@@ -89,7 +63,7 @@ const LearningStats = () => {
             </div>
           </div>
 
-          {/* Feature Cards */}
+          {/* Feature Cards Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
             {[
               {
@@ -116,19 +90,17 @@ const LearningStats = () => {
             ].map((feature, index) => (
               <div
                 key={index}
-                className={`shadow-md p-6 rounded-lg flex flex-col items-center text-center transition-all ${
-                  isDarkMode
-                    ? "bg-gray-800 text-white"
-                    : "bg-white text-gray-900"
-                }`}
+                className="bg-white dark:bg-gray-800 shadow-md p-6 rounded-lg flex flex-col items-center text-center"
               >
                 <div
                   className={`w-12 h-12 flex items-center justify-center text-white rounded-full ${feature.color}`}
                 >
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-bold mt-4">{feature.title}</h3>
-                <p className="mt-2 text-gray-700 dark:text-gray-300">
+                <h3 className="text-xl font-bold text-text-light-primary dark:text-white mt-4">
+                  {feature.title}
+                </h3>
+                <p className="text-text-light-secondary dark:text-gray-300 mt-2">
                   {feature.description}
                 </p>
               </div>
@@ -136,7 +108,7 @@ const LearningStats = () => {
           </div>
         </div>
       </section>
-    </div>
+    </>
   );
 };
 
