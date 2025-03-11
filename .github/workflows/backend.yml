@@ -26,7 +26,10 @@ jobs:
           sudo chmod 600 ~/.ssh/id_rsa-Adi
           sudo chmod 700 ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-
+      
+      - name: Verify SSH Connection
+        run: ssh -T git@github-aditya
+        
       - name: Pull and Deploy Backend
         working-directory: /var/www/projects/eq-aditya-j-mern-stack-internship-2025/backend/
         run: |
