@@ -1,0 +1,50 @@
+name: Frontend Deployment
+
+on:
+  push: 
+    branches:
+      - main
+
+jobs:
+  frontend:
+    runs-on: edumosaic-frontend
+
+    steps:
+     
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Repository Clone
+        run: ls -la $GITHUB_WORKSPACE
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '23'
+
+      - name: Print GitHub Workspace Path
+        run: echo "Workspace Path:$GITHUB_WORKSPACE"
+
+      - name: Check package.json location
+        run: |
+          if [ ! -f "$GITHUB_WORKSPACE/frontend/package.json" ]; then
+            echo "Error: package.json not found in $GITHUB_WORKSPACE/frontend"
+            exit 1
+          fi
+
+      - name: Install Dependencies & Build
+        working-directory: frontend
+        run: |
+          npm -f install
+          npm run build
+      
+
+      - name: Deploy to Production
+        run: |
+           rsync -avz --delete --ignore-existing $GITHUB_WORKSPACE/frontend/build/ /var/www/projects/eq-aditya-j-mern-stack-internship-2025/frontend/build/
+
+      - name: Cleanup Workspace
+        run: |
+          echo "Cleaning up workspace..."
+          rm -rf $GITHUB_WORKSPACE/*
+          echo "Workspace cleaned successfully!"
