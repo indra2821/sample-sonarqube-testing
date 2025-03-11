@@ -41,7 +41,7 @@ jobs:
 
       - name: Deploy to Production
         run: |
-           rsync -avz --delete --ignore-existing $GITHUB_WORKSPACE/frontend/dist/ /var/www/projects/eq-aditya-j-mern-stack-internship-2025/frontend/dist/
+           rsync -avz --delete --ignore-existing $GITHUB_WORKSPACE/frontend/build/ /var/www/projects/eq-aditya-j-mern-stack-internship-2025/frontend/build/
 
       - name: Cleanup Workspace
         run: |
