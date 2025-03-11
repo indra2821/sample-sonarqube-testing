@@ -17,7 +17,7 @@ jobs:
       - name: Start SSH Agent
         run: |
           eval $(ssh-agent -s)
-          ssh-add ~/.ssh/server_aditya-key
+          ssh-add ~/.ssh/id_rsa-Adi
           ssh -T git@github-aditya || true
           
       - name: Pull and Deploy Backend
