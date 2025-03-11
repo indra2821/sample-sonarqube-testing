@@ -2,29 +2,28 @@ on:
   push:
     branches:
       - main
-
 jobs:
   backend:
     runs-on: edumosaic-backend
-
     steps:
-
-
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up Node.js 
+        
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '23'
-
-        
+          
+      - name: Start SSH Agent
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/server_aditya-key
+          ssh -T git@github-aditya || true
+          
       - name: Pull and Deploy Backend
         working-directory: /var/www/projects/eq-aditya-j-mern-stack-internship-2025/backend/
         run: |
-          echo "Pulling latest code for backend" 
-        
-          
-          git pull 
-          npm install &&
-          pm2 restart edumosaic-backend
+          echo "Pulling latest code for backend"
+          git config --global --add safe.directory /var/www/projects/eq-aditya-j-mern-stack-internship-2025/backend
+          git pull
+          npm install && pm2 restart edumosaic-backend
