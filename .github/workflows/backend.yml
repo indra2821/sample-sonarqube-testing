@@ -23,6 +23,6 @@ jobs:
         run: |
           echo "Pulling latest code for backend" 
           
-          git pull &&
+          git pull origin main &&
           npm install &&
           pm2 restart edumosaic-backend
