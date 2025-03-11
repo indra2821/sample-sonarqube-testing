@@ -11,7 +11,7 @@ jobs:
 
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Set up Node.js 
         uses: actions/setup-node@v3
@@ -23,6 +23,6 @@ jobs:
         run: |
           echo "Pulling latest code for backend" 
           
-          git pull origin main &&
+          git pull &&
           npm install &&
           pm2 restart edumosaic-backend
