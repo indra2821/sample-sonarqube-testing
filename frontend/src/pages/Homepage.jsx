@@ -1,143 +1,111 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import home1 from "../assets/home1.svg";
+import { useNavigate } from "react-router-dom";
 
-const LearningStats = () => {
-  // State to track dark mode
-  const [isDarkMode, setIsDarkMode] = useState(false);
+const Homepage = () => {
+  const navigate = useNavigate();
+  const [isDarkMode, setIsDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
 
-  // Check dark mode from local storage or system preference
+  // Listen for changes in the theme
   useEffect(() => {
-    const darkModeEnabled =
-      localStorage.getItem("theme") === "dark" ||
-      window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setIsDarkMode(darkModeEnabled);
+    const updateTheme = () => {
+      setIsDarkMode(localStorage.getItem("theme") === "dark");
+    };
+
+    window.addEventListener("theme-change", updateTheme);
+    return () => window.removeEventListener("theme-change", updateTheme);
   }, []);
 
   return (
     <div
-      className={`w-full pt-20 transition-all duration-300 ${
-        isDarkMode ? "bg-[#000814] text-white" : "bg-[#f2e9e4] text-gray-900"
-      }`}
+      className={`w-full pt-20 ${isDarkMode ? "bg-[#000814] text-white" : "bg-[#f2e9e4] text-gray-900"}`}
     >
-      {/* Section 1: Stats */}
-      <section className="w-full py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { value: "34K+", label: "Success Stories" },
-              { value: "210+", label: "Expert Instructors" },
-              { value: "54K+", label: "Online Courses" },
-              { value: "80K+", label: "Worldwide Members" },
-            ].map((stat, index) => (
-              <div
-                key={index}
-                className="border-r last:border-0 border-gray-300 dark:border-gray-600"
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div className="text-center lg:text-left order-2 lg:order-1">
+            <h1 className="text-6xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+              You bring the <span className="text-[#F77F00]">expertise</span>,
+              <br />
+              {"we'll make it unforgettable."}
+            </h1>
+            <p className="text-base sm:text-lg mb-8">
+              Using highly personalized activities, videos, and animations, you
+              can energize your students and help them achieve their learning
+              goals as they progress through a journey.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <button
+                onClick={() => navigate("/signup")}
+                className="bg-[#F77F00] text-white font-medium py-3 px-6 rounded-4xl transition duration-300 flex items-center justify-center space-x-2 hover:bg-[#05668D]"
               >
-                <h2 className="text-4xl font-bold mb-2">{stat.value}</h2>
-                <p className="text-lg text-gray-700 dark:text-gray-300">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+                <span>Register</span>
+                <span>→</span>
+              </button>
 
-      {/* Section 2: Hero Text and Description */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            {/* Left Content */}
-            <div>
-              <p className="text-green-500 font-semibold uppercase">
-                Who We Are
-              </p>
-              <h2 className="text-4xl font-bold mt-2 text-gray-900 dark:text-white">
-                Your Online Learning Partner
-              </h2>
-              <p className="mt-4 text-gray-700 dark:text-gray-300">
-                Egestas faucibus nisl et ultricies. Tempus lectus condimentum
-                tristique mauris id vitae. Id pulvinar a eget vitae pellentesque
-                ridiculus platea. Vulputate cursus.
-              </p>
-            </div>
-
-            {/* Right Content: Video Course */}
-            <div
-              className={`p-6 rounded-lg shadow-md ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
-              }`}
-            >
-              <h3 className="text-xl font-bold">
-                Video Course <span className="text-gray-500">(1/110)</span>
-              </h3>
-              <div className="mt-4">
-                <div className="flex items-center justify-between bg-blue-500 text-white p-3 rounded-md">
-                  <span className="flex items-center gap-2">
-                    <span className="w-4 h-4 bg-white rounded-full"></span>
-                    Introduction
-                  </span>
-                  <span>7:00</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 p-3 mt-2 rounded-md">
-                  <span className="flex items-center gap-2">
-                    <span className="w-4 h-4 bg-gray-500 rounded-full"></span>
-                    Social Media Marketing
-                  </span>
-                  <span>65:00</span>
-                </div>
-              </div>
+              <button
+                onClick={() => navigate("/login")}
+                className="border border-[#F77F00] text-[#F77F00] font-medium py-3 px-6 rounded-4xl transition duration-300 flex items-center justify-center space-x-2 hover:bg-[#F77F00] hover:text-white"
+              >
+                <span>Login</span>
+                <span>→</span>
+              </button>
             </div>
           </div>
 
-          {/* Feature Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-            {[
-              {
-                icon: "📘",
-                title: "Online Courses",
-                description:
-                  "Egestas faucibus nisl et ultricies. Tempus lectus condimentum tristique mauris id vitae. Id pulvinar eget vitae.",
-                color: "bg-blue-500",
-              },
-              {
-                icon: "⬆️",
-                title: "Upgrade Skills",
-                description:
-                  "Egestas faucibus nisl et ultricies. Tempus lectus condimentum tristique mauris id vitae. Id pulvinar eget vitae.",
-                color: "bg-green-500",
-              },
-              {
-                icon: "🏆",
-                title: "Certifications",
-                description:
-                  "Egestas faucibus nisl et ultricies. Tempus lectus condimentum tristique mauris id vitae. Id pulvinar eget vitae.",
-                color: "bg-orange-500",
-              },
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className={`shadow-md p-6 rounded-lg flex flex-col items-center text-center transition-all ${
-                  isDarkMode
-                    ? "bg-gray-800 text-white"
-                    : "bg-white text-gray-900"
-                }`}
-              >
-                <div
-                  className={`w-12 h-12 flex items-center justify-center text-white rounded-full ${feature.color}`}
-                >
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-bold mt-4">{feature.title}</h3>
-                <p className="mt-2 text-gray-700 dark:text-gray-300">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+          <div className="flex justify-center lg:justify-end order-1 lg:order-2">
+            <img
+              src={home1}
+              alt="Education illustration"
+              className="w-full max-w-md lg:max-w-lg xl:max-w-xl object-contain"
+            />
           </div>
         </div>
-      </section>
+      </div>
+
+      <div
+        className={`w-full py-8 ${isDarkMode ? "bg-[#000814]" : "bg-[#f2e9e4]"}`}
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg">
+            <div className="space-y-2">
+              <label className="block text-base sm:text-lg font-medium">
+                Select Course
+              </label>
+              <select
+                className={`w-full p-3 rounded-lg ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-[#f2e9e4] border-gray-300"} border`}
+              >
+                <option>Web Development</option>
+                <option>Data Science</option>
+                <option>UI/UX Design</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-base sm:text-lg font-medium">
+                Select Instructor
+              </label>
+              <select
+                className={`w-full p-3 rounded-lg ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-[#f2e9e4] border-gray-300"} border`}
+              >
+                <option>John Doe</option>
+                <option>Jane Smith</option>
+                <option>Emily Davis</option>
+              </select>
+            </div>
+
+            <div className="flex items-end">
+              <button className="w-full bg-[#05668D] text-white font-medium py-3 px-6 rounded-lg transition duration-300 hover:bg-[#F77F00]">
+                Search →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default LearningStats;
+export default Homepage;

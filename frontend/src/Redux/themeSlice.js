@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-// Get initial dark mode state from localStorage
 const getInitialDarkMode = () => {
   try {
     const savedTheme = localStorage.getItem("theme");
@@ -14,20 +13,16 @@ const getInitialDarkMode = () => {
   }
 };
 
-// Apply theme class immediately
 const applyThemeClass = (isDark) => {
   if (typeof document !== "undefined") {
     document.documentElement.classList.toggle("dark", isDark);
   }
 };
 
-// Initial state
 const initialState = { isDarkMode: getInitialDarkMode() };
-
-// Apply initial theme class
 applyThemeClass(initialState.isDarkMode);
 
-export const ThemeSlice = createSlice({
+const themeSlice = createSlice({
   name: "theme",
   initialState,
   reducers: {
@@ -40,9 +35,6 @@ export const ThemeSlice = createSlice({
   },
 });
 
-// Export correct reducer and actions
-export const { toggleDarkMode } = ThemeSlice.actions;
-export default ThemeSlice.reducer;
-
-// Selector
+export const { toggleDarkMode } = themeSlice.actions;
+export default themeSlice.reducer;
 export const selectIsDarkMode = (state) => state.theme.isDarkMode;
