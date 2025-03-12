@@ -10,7 +10,7 @@ import CoursesSection from "./Components/CoursesSection";
 import LearningPage from "./Components/LearningStats";
 import GetStarted from "./Components/GetStarted";
 
-// Simple components for routing
+
 const About = () => (
   <h1 className="text-center mt-20 text-theme-primary">About Us</h1>
 );
