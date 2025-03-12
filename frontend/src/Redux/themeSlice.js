@@ -2,17 +2,22 @@ import { createSlice } from "@reduxjs/toolkit";
 
 // Get initial dark mode state from localStorage
 const getInitialDarkMode = () => {
-  // Check localStorage first
-  const savedTheme = localStorage.getItem("theme");
-  if (savedTheme) {
-    return savedTheme === "dark";
-  }
+  try {
+    // Check localStorage first
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      return savedTheme === "dark";
+    }
 
-  // If no saved preference, check system preference
-  return (
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
+    // If no saved preference, check system preference
+    return (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
+  } catch (error) {
+    console.warn("Failed to get theme preference:", error);
+    return false; // Default to light theme
+  }
 };
 
 // Apply initial theme class immediately
