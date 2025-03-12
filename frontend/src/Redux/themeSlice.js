@@ -3,64 +3,46 @@ import { createSlice } from "@reduxjs/toolkit";
 // Get initial dark mode state from localStorage
 const getInitialDarkMode = () => {
   try {
-    // Check localStorage first
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       return savedTheme === "dark";
     }
-
-    // If no saved preference, check system preference
-    return (
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    );
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches;
   } catch (error) {
     console.warn("Failed to get theme preference:", error);
-    return false; // Default to light theme
+    return false;
   }
 };
 
-// Apply initial theme class immediately
+// Apply theme class immediately
 const applyThemeClass = (isDark) => {
   if (typeof document !== "undefined") {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle("dark", isDark);
   }
 };
 
 // Initial state
-const initialState = {
-  isDarkMode: getInitialDarkMode(),
-};
+const initialState = { isDarkMode: getInitialDarkMode() };
 
-// Apply initial theme class right away
+// Apply initial theme class
 applyThemeClass(initialState.isDarkMode);
 
-export const themeSlice = createSlice({
+export const ThemeSlice = createSlice({
   name: "theme",
   initialState,
   reducers: {
     toggleDarkMode: (state) => {
       state.isDarkMode = !state.isDarkMode;
-
-      // Update localStorage
       localStorage.setItem("theme", state.isDarkMode ? "dark" : "light");
-
-      // Apply theme class
       applyThemeClass(state.isDarkMode);
-
-      // Dispatch event for theme change
       window.dispatchEvent(new Event("theme-change"));
     },
   },
 });
 
-// Export actions and reducer
-export const { toggleDarkMode } = themeSlice.actions;
-export default themeSlice.reducer;
+// Export correct reducer and actions
+export const { toggleDarkMode } = ThemeSlice.actions;
+export default ThemeSlice.reducer;
 
 // Selector
 export const selectIsDarkMode = (state) => state.theme.isDarkMode;

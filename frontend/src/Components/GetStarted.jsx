@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { selectIsDarkMode } from "../Redux/ThemeSlice";
+import { selectIsDarkMode } from "../Redux/themeSlice";
 import edulogo from "../assets/edulogo.svg";
 
 const GetStarted = () => {

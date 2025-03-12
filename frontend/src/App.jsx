@@ -3,13 +3,12 @@ import { Provider } from "react-redux";
 import store from "./Redux/store";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { selectIsDarkMode } from "./Redux/ThemeSlice";
+import { selectIsDarkMode } from "./Redux/themeSlice";
 import Navbar from "./Components/Navbar";
 import Home from "./pages/homepage";
 import CoursesSection from "./Components/CoursesSection";
 import LearningPage from "./Components/LearningStats";
 import GetStarted from "./Components/GetStarted";
-
 
 const About = () => (
   <h1 className="text-center mt-20 text-theme-primary">About Us</h1>
