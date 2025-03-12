@@ -9,12 +9,13 @@ import Home from "./pages/Homepage";
 import CoursesSection from "./Components/CoursesSection";
 import LearningPage from "./Components/LearningStats";
 import GetStarted from "./Components/GetStarted";
-
+import Instructors from "./Components/Instructors"; 
+import HowItWorks from "./Components/HowItWorks";
+import Benefits from "./Components/Benefits";
+import FAQ from "./Components/FAQ";
+import Footer from "./Components/Footer";
 const About = () => (
   <h1 className="text-center mt-20 text-theme-primary">About Us</h1>
-);
-const Instructors = () => (
-  <h1 className="text-center mt-20 text-theme-primary">Instructors</h1>
 );
 const Contact = () => (
   <h1 className="text-center mt-20 text-theme-primary">Contact Us</h1>
@@ -61,7 +62,12 @@ function AppContent() {
                   <Home />
                   <CoursesSection />
                   <LearningPage />
+                  <Instructors />
                   <GetStarted />
+                  <HowItWorks />
+                  <Benefits />
+                  <FAQ />
+                  <Footer />
                 </>
               }
             />
