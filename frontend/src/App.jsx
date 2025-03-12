@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectIsDarkMode } from "./Redux/themeSlice";
 import Navbar from "./Components/Navbar";
-import Home from "./pages/homepage";
+import Home from "./pages/Homepage";
 import CoursesSection from "./Components/CoursesSection";
 import LearningPage from "./Components/LearningStats";
 import GetStarted from "./Components/GetStarted";
