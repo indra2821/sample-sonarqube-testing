@@ -39,7 +39,7 @@ const Benefits = () => {
   ];
 
   return (
-    <section className="py-16 text-center bg-light dark:bg-dark transition-colors duration-300">
+    <section className="py-16 px-20 text-center bg-light dark:bg-dark transition-colors duration-300">
       <h2 className="text-green-600 font-semibold uppercase tracking-wide">Our Benefits</h2>
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white mt-3 max-w-3xl mx-auto">
         By Joining eLearning Platform, One Can Avail a Lot Of Benefits.

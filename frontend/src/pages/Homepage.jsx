@@ -22,7 +22,7 @@ const Homepage = () => {
     <div
       className={`w-full pt-20 ${isDarkMode ? "bg-[#000814] text-white" : "bg-[#f2e9e4] text-gray-900"}`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="text-center lg:text-left order-2 lg:order-1">
             <h1 className="text-6xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight">

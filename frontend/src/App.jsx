@@ -9,33 +9,30 @@ import Home from "./pages/Homepage";
 import CoursesSection from "./Components/CoursesSection";
 import LearningPage from "./Components/LearningStats";
 import GetStarted from "./Components/GetStarted";
-import Instructors from "./Components/Instructors"; 
+import Instructors from "./Components/Instructors";
 import HowItWorks from "./Components/HowItWorks";
 import Benefits from "./Components/Benefits";
 import FAQ from "./Components/FAQ";
 import Footer from "./Components/Footer";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import OtpVerification from "./pages/OtpVerification"; 
+
 const About = () => (
   <h1 className="text-center mt-20 text-theme-primary">About Us</h1>
 );
 const Contact = () => (
   <h1 className="text-center mt-20 text-theme-primary">Contact Us</h1>
 );
-const Login = () => (
-  <h1 className="text-center mt-20 text-theme-primary">Login Page</h1>
-);
-const Signup = () => (
-  <h1 className="text-center mt-20 text-theme-primary">Sign Up Page</h1>
-);
 const Events = () => (
   <h1 className="text-center mt-20 text-theme-primary">Events</h1>
 );
 
-// Theme initialization component
 const ThemeInitializer = ({ children }) => {
   const isDarkMode = useSelector(selectIsDarkMode);
 
   useEffect(() => {
-    // Initialize theme on app load
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
       document.body.style.backgroundColor = "#000814";
@@ -78,6 +75,12 @@ function AppContent() {
             <Route path="/contactus" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/dashboard" element={<Dashboard role="student" />} />
+            <Route
+              path="/otp-verification"
+              element={<OtpVerification />}
+            />{" "}
+            
           </Routes>
         </div>
       </ThemeInitializer>

@@ -43,7 +43,7 @@ const Instructors = () => {
   ];
 
   return (
-    <div className="container mx-auto text-center py-12">
+    <div className="container mx-auto text-center py-12 ">
       <h2 className="text-3xl font-bold text-black">Meet the Heroes</h2>
       <p className="text-gray-500 mt-2 max-w-2xl mx-auto">
         On Weekend UX, instructors from all over the world instruct millions of
