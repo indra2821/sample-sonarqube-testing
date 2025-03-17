@@ -1,37 +1,22 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import signupSvg from "../assets/signup.svg";
+import edulogo from "../assets/edulogo.svg";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    role: "student",
-    agreeToTerms: false,
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("Student"); // Default role
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!formData.firstName || !formData.lastName || !formData.email) {
-      setError("All fields are required");
-      return;
-    }
-
-    if (!formData.agreeToTerms) {
-      setError("You must agree to the terms and conditions");
+    if (!name || !email) {
+      setError("All fields are required.");
       return;
     }
 
@@ -42,84 +27,73 @@ const Signup = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          role: formData.role,
-        }),
+        body: JSON.stringify({ name, email, role }),
       });
 
       const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.message || "Signup failed");
+        throw new Error(data.message || "Failed to send OTP");
       }
 
-      // Store email for OTP verification
-      sessionStorage.setItem("email", formData.email);
-      navigate("/verify-otp", { state: { isLogin: false } });
+ 
+      sessionStorage.setItem("email", email);
+      navigate("/verify-otp", { state: { isSignup: true } });
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
-    navigate("/otp-verification", { state: { isLogin: false } });
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
-      <div className="w-full md:w-1/2 bg-theme p-8 flex flex-col justify-center">
+    <div className="flex flex-col md:flex-row h-screen">
+      
+      <div className="relative w-full md:w-1/2 bg-blue-800 hidden md:block">
+        <img
+          src={signupSvg}
+          alt="Signup"
+          className="w-full h-full object-cover object-center"
+        />
+      </div>
+
+    
+      <div className="w-full md:w-1/2 bg-theme p-6 flex flex-col justify-center">
         <div className="max-w-md mx-auto w-full">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-theme-primary mb-1">
-              Register and begin to learn
-            </h2>
-            <p className="text-theme-secondary text-sm">
-              {"Let's get your account set up."}
-            </p>
+          <div className="mb-4 flex items-center justify-center">
+            <img src={edulogo} alt="Logo" className="h-8 mr-2" />
+            <h2 className="text-xl font-bold text-theme-primary">EduMosaic</h2>
           </div>
 
+          <h2 className="text-xl font-bold text-theme-primary mb-1 text-center">
+            Sign Up
+          </h2>
+          <p className="text-theme-secondary text-sm mb-4 text-center">
+            Create an account and get started!
+          </p>
+
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-4 text-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="firstName"
-                  className="block text-sm font-medium text-theme-secondary mb-1"
-                >
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="input-theme w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="lastName"
-                  className="block text-sm font-medium text-theme-secondary mb-1"
-                >
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="input-theme w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  required
-                />
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-theme-secondary mb-1"
+              >
+                Full Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="input-theme w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-sm"
+                required
+              />
             </div>
 
             <div>
@@ -132,10 +106,9 @@ const Signup = () => {
               <input
                 type="email"
                 id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="input-theme w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-theme w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-sm"
                 required
               />
             </div>
@@ -145,66 +118,37 @@ const Signup = () => {
                 htmlFor="role"
                 className="block text-sm font-medium text-theme-secondary mb-1"
               >
-                Register as
+                Role
               </label>
               <select
                 id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="input-theme w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-              </select>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="agreeToTerms"
-                name="agreeToTerms"
-                checked={formData.agreeToTerms}
-                onChange={handleChange}
-                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="input-theme w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-sm"
                 required
-              />
-              <label
-                htmlFor="agreeToTerms"
-                className="ml-2 block text-sm text-theme-secondary"
               >
-                I agree to the{" "}
-                <Link to="/terms" className="text-primary hover:underline">
-                  Terms
-                </Link>
-                ,{" "}
-                <Link to="/privacy" className="text-primary hover:underline">
-                  Privacy Policy
-                </Link>{" "}
-                and{" "}
-                <Link to="/fees" className="text-primary hover:underline">
-                  Fees
-                </Link>
-              </label>
+                <option value="Student">Student</option>
+                <option value="Instructor">Instructor</option>
+              </select>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-2 px-4 rounded-md transition-colors text-white font-medium"
+              className="btn-primary w-full py-2 px-4 rounded-md transition-colors text-white font-medium text-sm"
             >
-              {loading ? "Sending OTP..." : "Send OTP"}
+              {loading ? "Sending OTP..." : "Sign Up"}
             </button>
-          </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-theme-secondary">
-              Already have an account?{" "}
-              <Link to="/login" className="text-primary hover:underline">
-                Log In
+            <div className="flex justify-center items-center mt-2 text-sm space-x-1">
+              <span className="text-theme-secondary">
+                Already have an account?
+              </span>
+              <Link to="/login" className="text-blue-600 hover:underline">
+                Sign in
               </Link>
-            </p>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

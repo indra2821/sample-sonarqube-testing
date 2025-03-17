@@ -17,7 +17,7 @@ import Footer from "./Components/Footer";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import OtpVerification from "./pages/OtpVerification"; 
+import OtpVerification from "./pages/OtpVerification";
 
 const About = () => (
   <h1 className="text-center mt-20 text-theme-primary">About Us</h1>
@@ -76,11 +76,7 @@ function AppContent() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={<Dashboard role="student" />} />
-            <Route
-              path="/otp-verification"
-              element={<OtpVerification />}
-            />{" "}
-            
+            <Route path="/verify-otp" element={<OtpVerification />} />
           </Routes>
         </div>
       </ThemeInitializer>

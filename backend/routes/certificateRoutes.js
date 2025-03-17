@@ -3,7 +3,7 @@ const router = express.Router();
 const certificateController = require("../controllers/certificateController");
 const { authenticateUser: protect } = require("../middleware/authMiddleware");
 
-console.log("certificateController:", certificateController);
+// console.log("certificateController:", certificateController);
 
 router.post(
   "/generate/:courseId",
