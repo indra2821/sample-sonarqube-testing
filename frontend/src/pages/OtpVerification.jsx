@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setUser } from "../Redux/userSlice";
 
 const OtpVerification = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const isLogin = location.state?.isLogin || false;
@@ -67,6 +70,22 @@ const OtpVerification = () => {
 
       if (!response.ok) {
         throw new Error(data.message || "OTP verification failed");
+      }
+
+      if (isLogin) {
+        dispatch(
+          setUser({
+            name: data.name,
+            role: data.role,
+          })
+        );
+      } else {
+        dispatch(
+          setUser({
+            name: data.user.name,
+            role: data.user.role,
+          })
+        );
       }
 
       sessionStorage.removeItem("email");

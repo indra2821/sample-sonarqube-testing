@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import signupSvg from "../assets/signup.svg";
+import signupSvg from "../assets/signup.png";
 import edulogo from "../assets/edulogo.svg";
 
 const Signup = () => {

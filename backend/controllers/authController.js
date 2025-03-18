@@ -19,10 +19,10 @@ exports.initiateSignup = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Store temporary user data
+    
     req.app.locals.tempUser = { name, email, role };
 
-    // Send OTP for email verification
+   
     const response = await sendOtp(email, true, name);
     if (!response.success) {
       return res.status(500).json({ message: "OTP sending failed" });
@@ -53,10 +53,14 @@ exports.verifyOtp = async (req, res) => {
     req.app.locals.tempUser = null;
     await OTP.deleteOne({ email });
 
-    // Generate and set tokens for new user
+   
     GenerateAndSetTokens(newUser._id, newUser.role, res);
 
-    sendResponse(res, 201, "User registered successfully");
+    
+    res.status(201).json({
+      message: "User registered successfully",
+      user: { name: newUser.name, role: newUser.role },
+    });
   } catch (error) {
     console.error("Error in verifyOtp:", error);
     sendResponse(res, 500, "Internal server error");
@@ -88,15 +92,10 @@ exports.verifyLoginOtp = async (req, res) => {
       return sendResponse(res, 400, "Email and OTP are required");
     }
 
-    // Normalize email (convert to lowercase)
+    
     email = email.trim().toLowerCase();
     console.log(`Received normalized email: ${email}, OTP: ${otp}`);
 
-    // Check existing OTPs
-    const existingOtps = await OTP.find({ email });
-    console.log("Existing OTPs for this email:", existingOtps);
-
-    // Fetch the latest OTP
     const otpRecord = await OTP.findOne({ email }).sort({ createdAt: -1 });
     console.log("Fetched OTP record:", otpRecord);
 
@@ -120,7 +119,12 @@ exports.verifyLoginOtp = async (req, res) => {
     GenerateAndSetTokens(user._id, user.role, res);
     await OTP.deleteOne({ email });
 
-    res.status(200).json({ role: user.role, message: "Login successful" });
+   
+    res.status(200).json({
+      role: user.role,
+      name: user.name,
+      message: "Login successful",
+    });
   } catch (error) {
     console.error("Error in verifyLoginOtp:", error);
     sendResponse(res, 500, "Internal server error");

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { clearUser } from "../Redux/userSlice";
 import edulogo from "../assets/edulogo.svg";
 
 const Navbar = () => {
@@ -9,88 +11,83 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   
+  const { name, role, isAuthenticated } = useSelector((state) => state.user);
+  const isLoggedIn = isAuthenticated;
+
   useEffect(() => {
-    
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-      document.body.style.backgroundColor = "#000814";
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.body.style.backgroundColor = "#f2e9e4";
-      localStorage.setItem("theme", "light");
-    }
-    window.dispatchEvent(new Event("theme-change"));
-
-    // Force a re-render after DOM changes
-    const forceUpdate = setTimeout(() => {
-      const navElement = document.querySelector("nav");
-      if (navElement) {
-        if (isDarkMode) {
-          navElement.style.backgroundColor = "#000814";
-          navElement.classList.add("dark-mode");
-        } else {
-          navElement.style.backgroundColor = "#f2e9e4";
-          navElement.classList.remove("dark-mode");
-        }
+    const updateTheme = () => {
+      if (isDarkMode) {
+        document.documentElement.classList.add("dark");
+        document.body.style.backgroundColor = "#000814";
+      } else {
+        document.documentElement.classList.remove("dark");
+        document.body.style.backgroundColor = "#f2e9e4";
       }
-    }, 10);
+    };
 
-    return () => clearTimeout(forceUpdate);
+    updateTheme();
+    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    window.dispatchEvent(new Event("theme-change"));
   }, [isDarkMode]);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode((prevMode) => !prevMode);
+  const toggleDarkMode = () => setIsDarkMode(prev => !prev);
+
+ 
+  const getFirstLetter = () => name ? name.charAt(0).toUpperCase() : "U";
+  const getAvatarColor = () => {
+    const colors = [
+      "bg-blue-500", "bg-green-500", "bg-purple-500", 
+      "bg-yellow-500", "bg-pink-500", "bg-indigo-500",
+      "bg-red-500", "bg-orange-500", "bg-teal-500"
+    ];
+    return colors[(getFirstLetter().charCodeAt(0) % colors.length)];
   };
 
+  const handleLogout = () => {
+    dispatch(clearUser());
+    navigate("/");
+  };
+
+  
   const menuItems = [
     { name: "Home", path: "/" },
     { name: "About Us", path: "/aboutus" },
     { name: "Courses", path: "/courses" },
     { name: "Instructors", path: "/instructors" },
     { name: "Contact Us", path: "/contactus" },
-    { name: "Login", path: "/login" },
+    ...(!isLoggedIn ? [{ name: "Login", path: "/login" }] : [])
   ];
 
-  
-  const navBgColor = isDarkMode ? "#000814" : "#f2e9e4";
-  const textColor = isDarkMode ? "text-blue-300" : "text-blue-500";
+  const navStyles = {
+    backgroundColor: isDarkMode ? "#000814" : "#f2e9e4",
+    textColor: isDarkMode ? "text-blue-300" : "text-blue-500"
+  };
 
   return (
-    <nav
-      className="shadow-md w-full fixed top-0 z-50 transition-colors duration-300"
-      style={{ backgroundColor: navBgColor }}
-    >
+    <nav className="shadow-md w-full fixed top-0 z-50 transition-colors duration-300"
+      style={{ backgroundColor: navStyles.backgroundColor }}>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo & Brand */}
-          <div className="flex items-center">
-            <div
-              className="flex items-center cursor-pointer"
-              onClick={() => navigate("/")}
-            >
-              <img
-                src={edulogo}
-                alt="EduMosaic Logo"
-                className="h-8 w-auto mr-2 sm:h-10"
-              />
-              <span
-                className={`text-xl sm:text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}
-              >
-                EduMosaic
-              </span>
-            </div>
+          
+          {/* Logo Section */}
+          <div className="flex items-center cursor-pointer" onClick={() => navigate("/")}>
+            <img src={edulogo} alt="Logo" className="h-8 sm:h-10 mr-2" />
+            <span className={`text-xl sm:text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+              EduMosaic
+            </span>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-3 xl:space-x-6">
+          <div className="hidden lg:flex items-center space-x-6">
             {menuItems.map((item) => (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`${textColor} hover:text-[#F77F00] transition duration-100 px-2 xl:px-3 py-2 text-sm xl:text-base ${
+                className={`${navStyles.textColor} hover:text-[#F77F00] px-3 py-2 text-sm ${
                   location.pathname === item.path ? "underline font-medium" : ""
                 }`}
               >
@@ -98,63 +95,69 @@ const Navbar = () => {
               </button>
             ))}
 
-            <button
-              onClick={() => navigate("/signup")}
-              className="bg-[#05668D] text-white px-3 xl:px-5 py-2 rounded-4xl hover:bg-[#F77F00] transition duration-100 text-sm xl:text-base ml-1"
-            >
-              Sign Up
-            </button>
-
-            <div className="flex items-center ml-2 xl:ml-4">
-              <label className="inline-flex items-center cursor-pointer">
-                <span className={`mr-1 text-xs xl:text-sm ${textColor}`}>
-                  Light
-                </span>
-                <div className="relative inline-block w-8 xl:w-10 align-middle select-none">
-                  <input
-                    type="checkbox"
-                    name="toggle"
-                    id="desktop-toggle"
-                    className="opacity-0 absolute h-0 w-0"
-                    checked={isDarkMode}
-                    onChange={toggleDarkMode}
-                  />
-                  <div className="bg-gray-300 block w-8 xl:w-10 h-4 xl:h-5 rounded-full"></div>
-                  <div
-                    className={`absolute block w-3 xl:w-4 h-3 xl:h-4 rounded-full bg-white top-0.5 left-0.5 transition-transform duration-300 ease-in-out ${
-                      isDarkMode
-                        ? "transform translate-x-4 xl:translate-x-5"
-                        : ""
-                    }`}
-                  ></div>
+            {/* User Section */}
+            {isLoggedIn ? (
+              <div className="flex items-center space-x-3 ml-4">
+                <div className="text-right">
+                  <p className={`text-xs ${navStyles.textColor}`}>{role}</p>
+                  <p className={`text-sm ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                    {name}
+                  </p>
                 </div>
-                <span className={`ml-1 text-xs xl:text-sm ${textColor}`}>
-                  Dark
-                </span>
-              </label>
-            </div>
+                <div className={`${getAvatarColor()} w-8 h-8 rounded-full flex items-center justify-center text-white`}>
+                  {getFirstLetter()}
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="text-red-500 hover:text-red-700 text-sm"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate("/signup")}
+                className="bg-[#05668D] text-white px-5 py-2 rounded-full hover:bg-[#F77F00] ml-2"
+              >
+                Sign Up
+              </button>
+            )}
+
+            {/* Dark Mode Toggle */}
+            <label className="flex items-center space-x-2 ml-4">
+              <span className={`text-sm ${navStyles.textColor}`}>Light</span>
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={isDarkMode}
+                  onChange={toggleDarkMode}
+                  className="sr-only"
+                />
+                <div className="w-10 h-5 bg-gray-300 rounded-full shadow-inner">
+                  <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                    isDarkMode ? "translate-x-5" : ""
+                  }`} />
+                </div>
+              </div>
+              <span className={`text-sm ${navStyles.textColor}`}>Dark</span>
+            </label>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="lg:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`${textColor} focus:outline-none text-xl`}
-              aria-label="Toggle menu"
-            >
-              {isOpen ? "✖" : "☰"}
-            </button>
-          </div>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="lg:hidden text-2xl"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? "✕" : "☰"}
+          </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div
-          className="lg:hidden shadow-md absolute w-full transition-colors duration-300 py-2"
-          style={{ backgroundColor: navBgColor }}
-        >
-          <div className="flex flex-col space-y-3 px-6">
+        <div className="lg:hidden absolute w-full" style={{ backgroundColor: navStyles.backgroundColor }}>
+          <div className="px-4 pt-2 pb-4 space-y-2">
             {menuItems.map((item) => (
               <button
                 key={item.path}
@@ -162,47 +165,41 @@ const Navbar = () => {
                   navigate(item.path);
                   setIsOpen(false);
                 }}
-                className={`${textColor} hover:text-[#F77F00] transition duration-300 text-left py-1 ${
-                  location.pathname === item.path ? "underline font-medium" : ""
-                }`}
+                className={`block w-full text-left ${navStyles.textColor} hover:text-[#F77F00] p-2`}
               >
                 {item.name}
               </button>
             ))}
-            <button
-              onClick={() => {
-                navigate("/signup");
-                setIsOpen(false);
-              }}
-              className="bg-[#05668D] text-white px-5 py-2 rounded-lg hover:bg-[#F77F00] transition duration-300 mt-2 text-left w-full sm:w-auto"
-            >
-              Sign Up
-            </button>
 
-            {/* Dark Mode Toggle for Mobile - Inside Menu */}
-            <div
-              className={`flex items-center justify-between py-2 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"} mt-2`}
-            >
-              <span className={textColor}>Appearance</span>
-              <label className="inline-flex items-center cursor-pointer">
-                <span className={`mr-2 text-sm ${textColor}`}>Light</span>
-                <div className="relative inline-block w-10 align-middle select-none">
-                  <input
-                    type="checkbox"
-                    name="toggle"
-                    id="mobile-toggle"
-                    className="opacity-0 absolute h-0 w-0"
-                    checked={isDarkMode}
-                    onChange={toggleDarkMode}
-                  />
-                  <div className="bg-gray-300 block w-10 h-5 rounded-full"></div>
-                  <div
-                    className={`absolute block w-4 h-4 rounded-full bg-white top-0.5 left-0.5 transition-transform duration-300 ease-in-out ${
-                      isDarkMode ? "transform translate-x-5" : ""
-                    }`}
-                  ></div>
+            {isLoggedIn && (
+              <div className="pt-4 border-t border-gray-200">
+                <div className="flex items-center space-x-3">
+                  <div className={`${getAvatarColor()} w-8 h-8 rounded-full flex items-center justify-center text-white`}>
+                    {getFirstLetter()}
+                  </div>
+                  <div>
+                    <p className={`font-medium ${isDarkMode ? "text-white" : "text-gray-800"}`}>{name}</p>
+                    <p className={`text-xs ${navStyles.textColor}`}>{role}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="ml-auto text-red-500 hover:text-red-700 text-sm"
+                  >
+                    Logout
+                  </button>
                 </div>
-                <span className={`ml-2 text-sm ${textColor}`}>Dark</span>
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-gray-200">
+              <label className="flex items-center justify-between">
+                <span className={navStyles.textColor}>Dark Mode</span>
+                <input
+                  type="checkbox"
+                  checked={isDarkMode}
+                  onChange={toggleDarkMode}
+                  className="toggle-checkbox"
+                />
               </label>
             </div>
           </div>
