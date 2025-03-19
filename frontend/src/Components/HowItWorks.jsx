@@ -22,7 +22,7 @@ const HowItWorks = () => {
 
   return (
     <div className="container mx-auto text-center py-16">
-      <p className="text-green-600 font-semibold text-sm uppercase">
+      <p className="text-primary font-semibold text-sm uppercase">
         How It Works
       </p>
       <h2 className="text-4xl font-bold text-black mt-2">
@@ -37,7 +37,7 @@ const HowItWorks = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
         {steps.map((step, index) => (
           <div key={index} className="flex flex-col items-center">
-            <div className="w-12 h-12 flex items-center justify-center bg-blue-500 text-white text-lg font-bold rounded-full">
+            <div className="w-12 h-12 flex items-center justify-center bg-[--text-primary] text-white text-lg font-bold rounded-full">
               {step.number}
             </div>
             <h3 className="text-xl font-semibold mt-4">{step.title}</h3>

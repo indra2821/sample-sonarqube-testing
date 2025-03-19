@@ -9,7 +9,9 @@
   --primary-hover: #F77F00;
   --bg-light: #f2e9e4;
   --bg-dark: #000814;
-  --text-light-primary: #1F2937;
+  /* --text-light-primary: #1F2937; */
+  --text-primary: #05668D;
+  --text-primary2: #F77F00;
   --text-light-secondary: #4B5563;
   --text-dark-primary: #FFFFFF;
   --text-dark-secondary: #D1D5DB;

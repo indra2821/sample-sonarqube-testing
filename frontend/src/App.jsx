@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { selectIsDarkMode } from "./Redux/themeSlice";
 import Navbar from "./Components/Navbar";
 import Home from "./pages/Homepage";
-import CoursesSection from "./Components/CoursesSection";
+import CoursesCarousel from "./Components/CoursesCarousel";
 import LearningPage from "./Components/LearningStats";
 import GetStarted from "./Components/GetStarted";
 import Instructors from "./Components/Instructors";
@@ -18,6 +18,9 @@ import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import OtpVerification from "./pages/OtpVerification";
+import ContactUs from "./Components/ContactUs";
+
+
 
 const About = () => (
   <h1 className="text-center mt-20 text-theme-primary">About Us</h1>
@@ -57,19 +60,20 @@ function AppContent() {
               element={
                 <>
                   <Home />
-                  <CoursesSection />
+                  <CoursesCarousel />
                   <LearningPage />
                   <Instructors />
                   <GetStarted />
                   <HowItWorks />
                   <Benefits />
                   <FAQ />
+                  <ContactUs />
                   <Footer />
                 </>
               }
             />
             <Route path="/aboutus" element={<About />} />
-            <Route path="/courses" element={<CoursesSection />} />
+            <Route path="/courses" element={<CoursesCarousel />} />
             <Route path="/instructors" element={<Instructors />} />
             <Route path="/events" element={<Events />} />
             <Route path="/contactus" element={<Contact />} />

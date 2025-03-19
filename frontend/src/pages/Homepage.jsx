@@ -1,26 +1,17 @@
-import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { selectIsDarkMode } from "../Redux/themeSlice";
 import home1 from "../assets/home1.svg";
 import { useNavigate } from "react-router-dom";
 
 const Homepage = () => {
   const navigate = useNavigate();
-  const [isDarkMode, setIsDarkMode] = useState(
-    localStorage.getItem("theme") === "dark"
-  );
-
-  // Listen for changes in the theme
-  useEffect(() => {
-    const updateTheme = () => {
-      setIsDarkMode(localStorage.getItem("theme") === "dark");
-    };
-
-    window.addEventListener("theme-change", updateTheme);
-    return () => window.removeEventListener("theme-change", updateTheme);
-  }, []);
+  const isDarkMode = useSelector(selectIsDarkMode); // Get theme state from Redux
 
   return (
     <div
-      className={`w-full pt-20 ${isDarkMode ? "bg-[#000814] text-white" : "bg-[#f2e9e4] text-gray-900"}`}
+      className={`w-full pt-20 ${
+        isDarkMode ? "bg-[#000814] text-white" : "bg-[#f2e9e4] text-gray-900"
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -66,16 +57,30 @@ const Homepage = () => {
       </div>
 
       <div
-        className={`w-full py-8 ${isDarkMode ? "bg-[#000814]" : "bg-[#f2e9e4]"}`}
+        className={`w-full py-8 ${
+          isDarkMode ? "bg-[#000814]" : "bg-[#f2e9e4]"
+        }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg">
+          <div
+            className={`grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg ${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            }`}
+          >
             <div className="space-y-2">
-              <label className="block text-base sm:text-lg font-medium">
+              <label
+                className={`block text-base sm:text-lg font-medium ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
                 Select Course
               </label>
               <select
-                className={`w-full p-3 rounded-lg ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-[#f2e9e4] border-gray-300"} border`}
+                className={`w-full p-3 rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-[#f2e9e4] border-gray-300 text-gray-900"
+                } border`}
               >
                 <option>Web Development</option>
                 <option>Data Science</option>
@@ -84,11 +89,19 @@ const Homepage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-base sm:text-lg font-medium">
+              <label
+                className={`block text-base sm:text-lg font-medium ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
                 Select Instructor
               </label>
               <select
-                className={`w-full p-3 rounded-lg ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-[#f2e9e4] border-gray-300"} border`}
+                className={`w-full p-3 rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-[#f2e9e4] border-gray-300 text-gray-900"
+                } border`}
               >
                 <option>John Doe</option>
                 <option>Jane Smith</option>
@@ -97,7 +110,11 @@ const Homepage = () => {
             </div>
 
             <div className="flex items-end">
-              <button className="w-full bg-[#05668D] text-white font-medium py-3 px-6 rounded-lg transition duration-300 hover:bg-[#F77F00]">
+              <button
+                className={`w-full ${
+                  isDarkMode ? "bg-[#05668D]" : "bg-[#05668D]"
+                } text-white font-medium py-3 px-6 rounded-lg transition duration-300 hover:bg-[#F77F00]`}
+              >
                 Search →
               </button>
             </div>
