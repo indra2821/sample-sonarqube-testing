@@ -23,7 +23,7 @@ const CourseSchema = new mongoose.Schema(
     ],
   },
   {
-    timestamps: true, // Optional: adds createdAt and updatedAt
+    timestamps: true, 
   }
 );
 

@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { clearUser } from "../Redux/userSlice";
+import { toggleDarkMode, selectIsDarkMode } from "../Redux/themeSlice";
 import edulogo from "../assets/edulogo.svg";
 
 const Navbar = () => {
-  const [isDarkMode, setIsDarkMode] = useState(
-    localStorage.getItem("theme") === "dark"
-  );
+  const isDarkMode = useSelector(selectIsDarkMode);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,10 +23,11 @@ const Navbar = () => {
     };
 
     updateTheme();
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
   }, [isDarkMode]);
 
-  const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
+  const handleToggleDarkMode = () => {
+    dispatch(toggleDarkMode());
+  };
 
   const getFirstLetter = () => (name ? name.charAt(0).toUpperCase() : "U");
 
@@ -146,7 +146,7 @@ const Navbar = () => {
                 <input
                   type="checkbox"
                   checked={isDarkMode}
-                  onChange={toggleDarkMode}
+                  onChange={handleToggleDarkMode}
                   className="sr-only"
                   aria-label="Toggle dark mode"
                 />
@@ -284,7 +284,7 @@ const Navbar = () => {
                   <input
                     type="checkbox"
                     checked={isDarkMode}
-                    onChange={toggleDarkMode}
+                    onChange={handleToggleDarkMode}
                     className="sr-only"
                     aria-label="Toggle dark mode"
                   />

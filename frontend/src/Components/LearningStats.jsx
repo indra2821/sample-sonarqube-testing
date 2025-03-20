@@ -26,7 +26,7 @@ const LearningStats = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             {/* Left Content */}
             <div>
-              <p className="text-green-500 font-semibold uppercase">
+              <p className="text-[#F77F00] font-semibold uppercase">
                 Who We Are
               </p>
               <h2 className="text-4xl font-bold text-text-light-primary dark:text-white mt-2">
@@ -45,7 +45,7 @@ const LearningStats = () => {
                 Video Course <span className="text-gray-500">(1/110)</span>
               </h3>
               <div className="mt-4">
-                <div className="flex items-center justify-between bg-blue-500 text-white p-3 rounded-md">
+                <div className="flex items-center justify-between bg-[#05668D] text-white p-3 rounded-md">
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 bg-white rounded-full"></span>
                     Introduction
@@ -71,14 +71,14 @@ const LearningStats = () => {
                 title: "Online Courses",
                 description:
                   "Egestas faucibus nisl et ultricies. Tempus lectus condimentum tristique mauris id vitae. Id pulvinar eget vitae.",
-                color: "bg-blue-500",
+                color: "bg-[#F77F00]",
               },
               {
                 icon: "⬆️",
                 title: "Upgrade Skills",
                 description:
                   "Egestas faucibus nisl et ultricies. Tempus lectus condimentum tristique mauris id vitae. Id pulvinar eget vitae.",
-                color: "bg-green-500",
+                color: "bg-[#F77F00]",
               },
               {
                 icon: "🏆",
