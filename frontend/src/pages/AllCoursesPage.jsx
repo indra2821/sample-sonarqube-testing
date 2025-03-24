@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { selectIsDarkMode } from "../Redux/themeSlice";
 
 const AllCoursesPage = () => {
@@ -135,7 +136,8 @@ const AllCoursesPage = () => {
                 >
                   Instructor: {course.instructor?.name || "Unknown Instructor"}
                 </p>
-                <button
+                <Link
+                  to={`/courses/${course._id}`}
                   className={`flex items-center gap-2 ${
                     isDarkMode
                       ? "text-white hover:text-gray-300"
@@ -144,7 +146,7 @@ const AllCoursesPage = () => {
                 >
                   <span className="text-sm sm:text-base">View Course</span>
                   <FaArrowRightLong className="text-sm" />
-                </button>
+                </Link>
               </div>
             </div>
           ))}

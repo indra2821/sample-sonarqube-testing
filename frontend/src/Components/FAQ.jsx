@@ -32,7 +32,9 @@ const FAQ = () => {
   ];
 
   return (
-    <div className={`p-6 text-center ${darkMode ? 'bg-[var(--bg-dark)]' : 'bg-[var(--bg-light)]'} transition-all duration-300`}>
+    <div
+      className={`p-6 text-center ${darkMode ? "bg-[var(--bg-dark)]" : "bg-[var(--bg-light)]"} transition-all duration-300`}
+    >
       {/* Dark Mode Toggle Button */}
       <button
         onClick={handleToggleDarkMode}
@@ -71,14 +73,16 @@ const FAQ = () => {
         )}
       </button>
 
-      <h2 className={`text-4xl font-semibold mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+      <h2
+        className={`text-4xl font-semibold mb-6 ${darkMode ? "text-white" : "text-gray-900"}`}
+      >
         FAQs
       </h2>
       <div className="w-full max-w-3xl mx-auto space-y-4">
         {faqs.map((faq, index) => (
           <div
             key={index}
-            className={`rounded-xl shadow-md ${darkMode ? 'bg-gray-900' : 'bg-white'} transition-all duration-300`}
+            className={`rounded-xl shadow-md ${darkMode ? "bg-gray-900" : "bg-white"} transition-all duration-300`}
           >
             <button
               className="w-full flex justify-between items-center bg-[var(--primary)] text-white text-lg font-semibold p-4 rounded-xl hover:bg-[var(--primary-hover)] transition-all duration-300"
@@ -92,7 +96,9 @@ const FAQ = () => {
               />
             </button>
             {openIndex === index && (
-              <div className={`p-4 text-lg ${darkMode ? 'text-gray-200 bg-gray-800' : 'text-gray-900 bg-gray-100'} rounded-b-xl transition-all duration-300`}>
+              <div
+                className={`p-4 text-lg ${darkMode ? "text-gray-200 bg-gray-800" : "text-gray-900 bg-gray-100"} rounded-b-xl transition-all duration-300`}
+              >
                 {faq.answer}
               </div>
             )}

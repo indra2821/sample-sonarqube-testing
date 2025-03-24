@@ -20,6 +20,7 @@ import OtpVerification from "./pages/OtpVerification";
 import ContactUs from "./Components/ContactUs";
 import LearningStats from "./Components/LearningStats";
 import AllCoursesPage from "./pages/AllCoursesPage";
+import CourseDetailsPage from "./pages/CourseDetailsPage";
 
 const ThemeHandler = ({ children }) => {
   const isDarkMode = useSelector(selectIsDarkMode); 
@@ -68,6 +69,7 @@ function AppContent() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={<Dashboard role="student" />} />
             <Route path="/verify-otp" element={<OtpVerification />} />
+            <Route path="/courses/:id" element={<CourseDetailsPage />} />
           </Routes>
         </div>
       </ThemeHandler>
