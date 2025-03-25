@@ -9,19 +9,38 @@ export const GenerateAndSetTokens = (_id, role, res) => {
     expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
   });
 
+  // Convert expiry days to milliseconds and create Date objects
+  const accessTokenExpiry = new Date(
+    Date.now() +
+      parseInt(process.env.ACCESS_TOKEN_COOKIE_EXPIRY) * 24 * 60 * 60 * 1000
+  );
+
+  const refreshTokenExpiry = new Date(
+    Date.now() +
+      parseInt(process.env.REFRESH_TOKEN_COOKIE_EXPIRY) * 24 * 60 * 60 * 1000
+  );
+
   const cookieOptions = {
-    httpOnly: true, // Security: Prevents JS access
-    secure: process.env.NODE_ENV === "production", // Secure only in production
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "Strict",
+    path: "/",
   };
 
-  // Clear previous cookies before setting new ones
-  res.clearCookie("AccessToken", cookieOptions);
-  res.clearCookie("RefreshToken", cookieOptions);
-
+  // Set cookies with proper expiry dates
   res
-    .cookie("AccessToken", AccessToken, cookieOptions)
-    .cookie("RefreshToken", RefreshToken, cookieOptions);
+    .cookie("AccessToken", AccessToken, {
+      ...cookieOptions,
+      expires: accessTokenExpiry,
+      maxAge:
+        parseInt(process.env.ACCESS_TOKEN_COOKIE_EXPIRY) * 24 * 60 * 60 * 1000,
+    })
+    .cookie("RefreshToken", RefreshToken, {
+      ...cookieOptions,
+      expires: refreshTokenExpiry,
+      maxAge:
+        parseInt(process.env.REFRESH_TOKEN_COOKIE_EXPIRY) * 24 * 60 * 60 * 1000,
+    });
 
   return { AccessToken, RefreshToken };
 };

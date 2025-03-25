@@ -130,3 +130,21 @@ exports.verifyLoginOtp = async (req, res) => {
     sendResponse(res, 500, "Internal server error");
   }
 };
+
+exports.checkAuthStatus = async (req, res) => {
+  try {
+    // This will automatically be handled by the authenticateUser middleware
+    const user = await User.findById(req.user._id).select("-password");
+    res.status(200).json({
+      isAuthenticated: true,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    res.status(200).json({ isAuthenticated: false });
+  }
+};

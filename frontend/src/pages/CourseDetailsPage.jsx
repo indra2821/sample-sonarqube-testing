@@ -1,15 +1,28 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaBookmark, FaRegBookmark, FaLock } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaBookmark,
+  FaRegBookmark,
+  FaClock,
+} from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { selectIsDarkMode } from "../Redux/themeSlice";
-import { selectUser } from "../Redux/userSlice";
+import { selectCurrentUser } from "../Redux/userSlice";
+
+import CourseHeader from "../Components/CourseHeader";
+import CourseContentList from "../Components/CourseContentList";
+import VideoPlayer from "../Components/VideoPlayer";
+import ImageViewer from "../Components/ImageViewer";
+import DocumentViewer from "../Components/DocumentViewer";
+import AudioPlayer from "../Components/AudioPlayer";
+import DefaultViewer from "../Components/DefaultViewer";
 
 const CourseDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isDarkMode = useSelector(selectIsDarkMode);
-  const user = useSelector(selectUser);
+  const user = useSelector(selectCurrentUser);
 
   const [course, setCourse] = useState(null);
   const [contents, setContents] = useState([]);
@@ -20,13 +33,35 @@ const CourseDetailsPage = () => {
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarking, setBookmarking] = useState(false);
   const [activeContent, setActiveContent] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  // Format time in MM:SS format
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
+  // Video event handlers
+  const handleVideoTimeUpdate = (e) => {
+    setCurrentTime(e.target.currentTime);
+  };
+
+  const handleVideoLoadedMetadata = (e) => {
+    setDuration(e.target.duration);
+  };
+
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
+  };
 
   // Check if user is enrolled in this course
   const checkEnrollmentStatus = useCallback(async () => {
     if (!user.isAuthenticated) return;
 
     try {
-      // Try to fetch course content - this will only succeed if enrolled
       const response = await fetch(
         `http://localhost:5000/api/courses/${id}/content`,
         {
@@ -41,7 +76,6 @@ const CourseDetailsPage = () => {
         const contentData = await response.json();
         setContents(contentData);
 
-        // Set the first content as active by default if available
         if (contentData.length > 0) {
           setActiveContent(contentData[0]);
         }
@@ -103,7 +137,6 @@ const CourseDetailsPage = () => {
         const data = await response.json();
         setCourse(data);
 
-        // Check if user is authenticated
         if (user.isAuthenticated) {
           checkEnrollmentStatus();
           checkBookmarkStatus();
@@ -144,7 +177,6 @@ const CourseDetailsPage = () => {
         throw new Error(errorData.message || "Failed to enroll in course");
       }
 
-      // Once enrolled, fetch course content
       await checkEnrollmentStatus();
     } catch (err) {
       setError(err.message);
@@ -192,7 +224,7 @@ const CourseDetailsPage = () => {
   // Set active content to view
   const handleContentSelect = (content) => {
     setActiveContent(content);
-    // Scroll to content viewer
+    setIsPlaying(false);
     document
       .getElementById("content-viewer")
       ?.scrollIntoView({ behavior: "smooth" });
@@ -205,150 +237,51 @@ const CourseDetailsPage = () => {
     switch (activeContent.file_type) {
       case "video":
         return (
-          <div className="aspect-video rounded overflow-hidden bg-black">
-            <video
-              src={activeContent.full_url}
-              controls
-              className="w-full h-full"
-              autoPlay
-            >
-              Your browser does not support the video tag.
-            </video>
-          </div>
+          <VideoPlayer
+            src={activeContent.full_url}
+            currentTime={currentTime}
+            duration={duration}
+            isPlaying={isPlaying}
+            togglePlayPause={togglePlayPause}
+            formatTime={formatTime}
+            onTimeUpdate={handleVideoTimeUpdate}
+            onLoadedMetadata={handleVideoLoadedMetadata}
+          />
         );
       case "image":
         return (
-          <div className="rounded overflow-hidden flex justify-center">
-            <img
-              src={activeContent.full_url}
-              alt={activeContent.title}
-              className="max-w-full max-h-96 object-contain"
-            />
-          </div>
+          <ImageViewer
+            src={activeContent.full_url}
+            title={activeContent.title}
+          />
         );
       case "document":
-        // PDF Viewer
-        if (activeContent.full_url.endsWith(".pdf")) {
-          return (
-            <div className="h-screen max-h-[70vh] rounded overflow-hidden">
-              <iframe
-                src={`${activeContent.full_url}#toolbar=0&navpanes=0`}
-                title={activeContent.title}
-                className="w-full h-full border-0"
-              />
-            </div>
-          );
-        }
-        // For other documents, fallback to download
         return (
-          <div className="text-center py-8">
-            <p className="mb-4">
-              This document cannot be previewed in the browser.
-            </p>
-            <a
-              href={activeContent.full_url}
-              download
-              className={`inline-block px-4 py-2 rounded-lg transition-colors ${
-                isDarkMode
-                  ? "bg-[#003566] text-white hover:bg-[#00509d]"
-                  : "bg-[#05668D] text-white hover:bg-[#024e6a]"
-              }`}
-            >
-              Download Document
-            </a>
-          </div>
+          <DocumentViewer
+            src={activeContent.full_url}
+            title={activeContent.title}
+          />
         );
       case "audio":
-        return (
-          <div className="rounded overflow-hidden p-4 flex justify-center">
-            <audio
-              src={activeContent.full_url}
-              controls
-              className="w-full max-w-xl"
-              autoPlay
-            >
-              Your browser does not support the audio tag.
-            </audio>
-          </div>
-        );
+        return <AudioPlayer src={activeContent.full_url} />;
       default:
-        // Try to determine file type from URL
-        if (activeContent.full_url) {
-          const extension = activeContent.full_url
-            .split(".")
-            .pop()
-            .toLowerCase();
-
-          // Handle HTML content
-          if (extension === "html" || extension === "htm") {
-            return (
-              <div className="h-screen max-h-[70vh] rounded overflow-hidden">
-                <iframe
-                  src={activeContent.full_url}
-                  title={activeContent.title}
-                  className="w-full h-full border-0"
-                  sandbox="allow-scripts allow-same-origin"
-                />
-              </div>
-            );
-          }
-
-          // For plain text, code files, etc.
-          if (
-            ["txt", "json", "js", "css", "html", "xml", "md"].includes(
-              extension
-            )
-          ) {
-            return (
-              <div className="text-center py-8">
-                <p className="mb-4">Text file detected. Fetching content...</p>
-                <a
-                  href={activeContent.full_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`inline-block px-4 py-2 rounded-lg transition-colors ${
-                    isDarkMode
-                      ? "bg-[#003566] text-white hover:bg-[#00509d]"
-                      : "bg-[#05668D] text-white hover:bg-[#024e6a]"
-                  }`}
-                >
-                  Open in New Tab
-                </a>
-              </div>
-            );
-          }
-        }
-
-        // Default fallback
-        return (
-          <div className="text-center py-8">
-            <p className="mb-4">
-              This file type cannot be previewed in the browser.
-            </p>
-            <a
-              href={activeContent.full_url}
-              download
-              className={`inline-block px-4 py-2 rounded-lg transition-colors ${
-                isDarkMode
-                  ? "bg-[#003566] text-white hover:bg-[#00509d]"
-                  : "bg-[#05668D] text-white hover:bg-[#024e6a]"
-              }`}
-            >
-              Download File
-            </a>
-          </div>
-        );
+        return <DefaultViewer src={activeContent.full_url} />;
     }
   };
 
   if (loading) {
     return (
       <div
-        className={`text-center py-12 ${
-          isDarkMode ? "text-gray-300" : "text-gray-600"
-        }`}
+        className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
       >
-        Loading course details...
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p
+            className={`text-lg ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+          >
+            Loading course details...
+          </p>
+        </div>
       </div>
     );
   }
@@ -356,19 +289,45 @@ const CourseDetailsPage = () => {
   if (error) {
     return (
       <div
-        className={`text-center py-12 ${
-          isDarkMode ? "text-red-400" : "text-red-600"
-        }`}
+        className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
       >
-        <p className="mb-4">Error: {error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className={`px-4 py-2 rounded-lg ${
-            isDarkMode ? "bg-[#003566] text-white" : "bg-[#05668D] text-white"
-          } hover:opacity-90 transition-opacity`}
-        >
-          Retry
-        </button>
+        <div className="text-center p-6 max-w-md">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-red-600 dark:text-red-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <h3
+            className={`text-xl font-bold mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
+          >
+            Error Loading Course
+          </h3>
+          <p
+            className={`mb-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+          >
+            {error}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+              isDarkMode
+                ? "bg-blue-600 hover:bg-blue-700 text-white"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -376,129 +335,138 @@ const CourseDetailsPage = () => {
   if (!course) {
     return (
       <div
-        className={`text-center py-12 ${
-          isDarkMode ? "text-gray-300" : "text-gray-600"
-        }`}
+        className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
       >
-        Course not found
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-gray-500 dark:text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <h3
+            className={`text-xl font-bold mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
+          >
+            Course Not Found
+          </h3>
+          <p
+            className={`mb-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+          >
+            The course you&apos;re looking for doesn&apos;t exist or may have
+            been removed.
+          </p>
+          <button
+            onClick={() => navigate(-1)}
+            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+              isDarkMode
+                ? "bg-blue-600 hover:bg-blue-700 text-white"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
+          >
+            Back to Courses
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div
-      className={`min-h-screen py-8 sm:py-12 transition-colors duration-300 ${
-        isDarkMode ? "bg-[#000814] text-white" : "bg-[#f2e9e4] text-gray-900"
-      }`}
+      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"}`}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Navigation and actions */}
-        <div className="flex flex-wrap justify-between items-center mb-6 sm:mb-8">
+        <div className="flex flex-wrap justify-between items-center mb-8">
           <button
             onClick={() => navigate(-1)}
-            className={`flex items-center gap-2 mb-4 sm:mb-0 ${
+            className={`flex items-center gap-2 mb-4 sm:mb-0 px-4 py-2 rounded-lg transition-colors ${
               isDarkMode
-                ? "text-gray-300 hover:text-white"
-                : "text-gray-700 hover:text-gray-900"
+                ? "hover:bg-gray-800 text-gray-300"
+                : "hover:bg-gray-200 text-gray-700"
             }`}
           >
             <FaArrowLeft />
-            <span>Back to Courses</span>
+            <span className="font-medium">Back to Courses</span>
           </button>
 
           {user && (
             <button
               onClick={toggleBookmark}
               disabled={bookmarking}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 isDarkMode
-                  ? "hover:bg-[#001d3d] text-gray-300"
+                  ? "hover:bg-gray-800 text-gray-300"
                   : "hover:bg-gray-200 text-gray-700"
-              }`}
+              } ${bookmarking ? "opacity-70 cursor-not-allowed" : ""}`}
             >
               {bookmarked ? (
                 <FaBookmark className="text-yellow-500" />
               ) : (
                 <FaRegBookmark />
               )}
-              <span>{bookmarked ? "Bookmarked" : "Bookmark"}</span>
+              <span className="font-medium">
+                {bookmarked ? "Bookmarked" : "Bookmark"}
+              </span>
             </button>
           )}
         </div>
 
-        {/* Course header */}
-        <div
-          className={`p-6 rounded-xl mb-8 ${
-            isDarkMode ? "bg-[#001d3d]" : "bg-white"
-          }`}
-        >
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4">{course.name}</h1>
-
-          <div
-            className={`mb-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
-          >
-            <p>Instructor: {course.instructor?.name || "Unknown Instructor"}</p>
-            <p>Contact: {course.instructor_email}</p>
-          </div>
-
-          {!enrolled && (
-            <button
-              onClick={handleEnroll}
-              disabled={enrolling}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                isDarkMode
-                  ? "bg-[#003566] text-white hover:bg-[#00509d]"
-                  : "bg-[#05668D] text-white hover:bg-[#024e6a]"
-              } ${enrolling ? "opacity-70 cursor-not-allowed" : ""}`}
-            >
-              {enrolling ? "Enrolling..." : "Enroll in this Course"}
-            </button>
-          )}
-
-          {enrolled && (
-            <div
-              className={`inline-block px-3 py-1 rounded-lg text-sm ${
-                isDarkMode
-                  ? "bg-[#003566] text-white"
-                  : "bg-green-100 text-green-800"
-              }`}
-            >
-              You are enrolled in this course
-            </div>
-          )}
-        </div>
+        <CourseHeader
+          course={course}
+          isDarkMode={isDarkMode}
+          enrolled={enrolled}
+          enrolling={enrolling}
+          handleEnroll={handleEnroll}
+          activeContent={activeContent}
+        />
 
         {/* Active content viewer */}
         {enrolled && activeContent && (
           <div
             id="content-viewer"
-            className={`p-6 rounded-xl mb-8 ${
-              isDarkMode ? "bg-[#001d3d]" : "bg-white"
-            }`}
+            className={`p-6 rounded-xl mb-8 shadow-lg ${isDarkMode ? "bg-gray-800" : "bg-white"}`}
           >
-            <h2 className="text-xl font-bold mb-4">{activeContent.title}</h2>
-            <p
-              className={`mb-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
-            >
-              {activeContent.description}
-            </p>
+            <div className="mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">
+                {activeContent.title}
+              </h2>
+              {activeContent.description && (
+                <p
+                  className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+                >
+                  {activeContent.description}
+                </p>
+              )}
+            </div>
 
             {renderContentViewer()}
 
             <div
-              className={`mt-4 text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+              className={`mt-4 flex flex-wrap items-center gap-4 text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
             >
               {activeContent.duration > 0 && (
-                <span className="mr-4">
-                  Duration: {activeContent.duration} minutes
+                <span className="flex items-center gap-2">
+                  <FaClock />
+                  <span>Duration: {activeContent.duration} minutes</span>
                 </span>
               )}
-              <span>
-                Type:{" "}
-                {activeContent.file_type
-                  ? activeContent.file_type.charAt(0).toUpperCase() +
-                    activeContent.file_type.slice(1)
-                  : "Unknown"}
+              <span className="flex items-center gap-2">
+                <span>Type:</span>
+                <span className="font-medium">
+                  {activeContent.file_type
+                    ? activeContent.file_type.charAt(0).toUpperCase() +
+                      activeContent.file_type.slice(1)
+                    : "Unknown"}
+                </span>
               </span>
             </div>
           </div>
@@ -506,87 +474,16 @@ const CourseDetailsPage = () => {
 
         {/* Course content section */}
         <div className="mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold mb-4">Course Content</h2>
-
-          {!enrolled && (
-            <div
-              className={`p-6 rounded-xl text-center ${
-                isDarkMode ? "bg-[#001d3d]" : "bg-white"
-              }`}
-            >
-              <FaLock className="mx-auto text-2xl mb-3" />
-              <p className="mb-4">
-                You need to enroll in this course to access the content
-              </p>
-              <button
-                onClick={handleEnroll}
-                disabled={enrolling}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  isDarkMode
-                    ? "bg-[#003566] text-white hover:bg-[#00509d]"
-                    : "bg-[#05668D] text-white hover:bg-[#024e6a]"
-                } ${enrolling ? "opacity-70 cursor-not-allowed" : ""}`}
-              >
-                {enrolling ? "Enrolling..." : "Enroll Now"}
-              </button>
-            </div>
-          )}
-
-          {enrolled && contents.length === 0 && (
-            <div
-              className={`p-6 rounded-xl text-center ${
-                isDarkMode ? "bg-[#001d3d]" : "bg-white"
-              }`}
-            >
-              <p>No content available for this course yet.</p>
-            </div>
-          )}
-
-          {enrolled && contents.length > 0 && (
-            <div className="grid gap-4 sm:gap-6">
-              {contents.map((content) => (
-                <div
-                  key={content._id}
-                  className={`p-4 sm:p-6 rounded-xl transition-colors cursor-pointer ${
-                    activeContent?._id === content._id
-                      ? isDarkMode
-                        ? "bg-[#003566] border-l-4 border-blue-400"
-                        : "bg-blue-50 border-l-4 border-blue-500"
-                      : isDarkMode
-                        ? "bg-[#001d3d] hover:bg-[#003566]"
-                        : "bg-white hover:bg-[#f2e9e4]"
-                  }`}
-                  onClick={() => handleContentSelect(content)}
-                >
-                  <h3 className="text-lg font-bold mb-2">{content.title}</h3>
-                  <p
-                    className={`mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
-                  >
-                    {content.description && content.description.length > 100
-                      ? `${content.description.substring(0, 100)}...`
-                      : content.description}
-                  </p>
-
-                  <div
-                    className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
-                  >
-                    {content.duration > 0 && (
-                      <span className="mr-4">
-                        Duration: {content.duration} 
-                      </span>
-                    )}minutes
-                    <span>
-                      Type:{" "}
-                      {content.file_type
-                        ? content.file_type.charAt(0).toUpperCase() +
-                          content.file_type.slice(1)
-                        : "Unknown"}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <h2 className="text-xl sm:text-2xl font-bold mb-6">Course Content</h2>
+          <CourseContentList
+            contents={contents}
+            enrolled={enrolled}
+            enrolling={enrolling}
+            handleEnroll={handleEnroll}
+            isDarkMode={isDarkMode}
+            activeContent={activeContent}
+            handleContentSelect={handleContentSelect}
+          />
         </div>
       </div>
     </div>
