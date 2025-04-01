@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  frontend-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile.staging
+    container_name: eq-frontend-staging
+    ports:
+      - "8083:8082"
+    environment:
+      - NODE_ENV=staging

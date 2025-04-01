@@ -9,6 +9,8 @@ export default defineConfig({
     outDir: "build", // Change the output directory to 'build'
   },
   server: {
+    host: "0.0.0.0",
+    port: 5173,
     allowedHosts: ["27c4-117-99-100-200.ngrok-free.app"], // Add ngrok URL here
   },
   proxy: {
