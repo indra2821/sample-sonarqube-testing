@@ -4,7 +4,7 @@ services:
   frontend-dev:
     build: 
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: ./Dockers/dev/Dockerfile
     container_name: eq-frontend-dev
     ports:
       - "0.0.0.0:5173:5173"
