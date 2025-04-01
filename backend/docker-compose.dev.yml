@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  backend-dev:
+    build:
+      context: .
+      dockerfile: ./Dockers/dev/Dockerfile
+    container_name: eq-backend-dev
+    volumes:
+      # Mount source code for hot reloading
+      - .:/app
+      # Don't override node_modules
+      - /app/node_modules
+    ports:
+      - "4001:4000"
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=${MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - SENDER_EMAIL=${SENDER_EMAIL}
+      - PORT=4000
+      - ACCESS_TOKEN_EXPIRY=${ACCESS_TOKEN_EXPIRY}
+      - REFRESH_TOKEN_EXPIRY=${REFRESH_TOKEN_EXPIRY}
+    env_file:
+      - .env
+    restart: unless-stopped
