@@ -13,6 +13,9 @@ Terraform command to start Production Environment :-
 
 
 You can change the port of frontend and backend according to environment by,
-just Go to /terraform/environments/dev.tfvars           # for development
-           /terraform/environments/staging.tfvars       # for staging
-           /terraform/environments/prod.tfvars          # for production
+just Go to
+/terraform/environments/dev.tfvars           # for development
+           
+/terraform/environments/staging.tfvars       # for staging
+           
+/terraform/environments/prod.tfvars          # for production
