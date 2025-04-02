@@ -1,29 +1,52 @@
-name: CI/CD workflow for Maven Build and Sonar Code scan
+name: MERN Stack CI/CD with SonarQube
+
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+
 jobs:
-  build:
+  build-and-analyze:
     runs-on: ubuntu-latest
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'adopt'
-        java-version: '11'
-    - name: Build with Maven
-      run: mvn clean install -f MyWebApp/pom.xml
-    - name: SonarQube Scan
-      uses: sonarsource/sonarqube-scan-action@master
-      with:
-        projectBaseDir: .
-        args: >
-          -Dsonar.organization=my-org
-          -Dsonar.projectKey=my-Java-web-app
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better SonarQube analysis
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd frontend && npm ci
+          cd ../backend && npm ci
+      
+      - name: Run tests
+        run: |
+          npm test
+      
+      - name: Build frontend
+        run: |
+          cd frontend && npm run build
+      
+      - name: SonarQube Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: '.'
+          args: >
+            -Dsonar.organization=your-org
+            -Dsonar.projectKey=your-mern-app
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
+            -Dsonar.sources=frontend/src,backend/src
+            -Dsonar.tests=frontend/src/__tests__,backend/src/__tests__
+            -Dsonar.exclusions=**/node_modules/**,**/*.test.js,**/build/**,**/dist/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
