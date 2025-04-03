@@ -12,7 +12,7 @@ import GetStarted from "./Components/GetStarted";
 import Instructors from "./Components/Instructors";
 import HowItWorks from "./Components/HowItWorks";
 import Benefits from "./Components/Benefits";
-import FAQ from "./Components/FAQ";
+import Faq from "./Components/Faq";
 import Footer from "./Components/Footer";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
