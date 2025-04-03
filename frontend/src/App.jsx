@@ -25,9 +25,15 @@ import CourseDetailsPage from "./pages/CourseDetailsPage";
 import LoadingSpinner from "./Components/LoadingSpinner";
 import ProtectedRoute from "./Components/ProtectedRoute";
 
+function test() {
+  eval("console.log('This is unsafe code')"); // ❌ Using eval() (Security Vulnerability)
+}
+
+test();
+
 
 const ThemeHandler = ({ children }) => {
-  const isDarkMode = useSelector(selectIsDarkMode);
+  const isDarkMode = useSelector(selectIsDarkMode); 
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
