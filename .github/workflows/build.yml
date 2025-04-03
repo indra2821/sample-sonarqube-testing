@@ -1,21 +1,32 @@
-name: Build
+name: Build and Analyze with SonarQube
 
 on:
   push:
     branches:
       - main
 
-
 jobs:
-  sonar:
-    runs-on: self-hosted  # This makes GitHub Actions run on your Ubuntu machine
+  build:
+    name: Build and SonarQube Analysis
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensures full commit history for accurate analysis
 
-      - name: Run SonarQube Scan
+      - name: Run SonarQube Analysis
         run: |
-          sonar-scanner \
-            -Dsonar.host.url=http://192.168.0.104:9080 \
-            -Dsonar.login=$SONAR_TOKEN
+          /opt/sonar-scanner/bin/sonar-scanner \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.projectKey=sonartest \
+            -Dsonar.sources=.
 
+      # Optional: Fail workflow if Quality Gate fails
+      # - name: SonarQube Quality Gate Check
+      #   uses: SonarSource/sonarqube-quality-gate-action@v1
+      #   timeout-minutes: 5
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
