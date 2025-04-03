@@ -26,11 +26,11 @@ import LoadingSpinner from "./Components/LoadingSpinner";
 import ProtectedRoute from "./Components/ProtectedRoute";
 
 
-const ThemeHandler = ( children }) => {
+const ThemeHandler = ({ children }) => {
   const isDarkMode = useSelector(selectIsDarkMode);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDarkMode);
+    document.documentElement.classList.toggle("dark", isDarkMode)
     document.body.style.backgroundColor = isDarkMode ? "#000814" : "#f2e9e4";
   }, [isDarkMode]);
 
