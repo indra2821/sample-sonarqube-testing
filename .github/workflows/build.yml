@@ -14,17 +14,28 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensures full commit history for accurate analysis
+          fetch-depth: 0  # Ensures full commit history for better analysis
+
+      - name: Install SonarScanner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-5.0.1.3006-linux.zip
+          unzip sonar-scanner-5.0.1.3006-linux.zip
+          sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
+          echo "export PATH=$PATH:/opt/sonar-scanner/bin" >> ~/.bashrc
+          source ~/.bashrc
+          sonar-scanner -v  # Check installation
 
       - name: Run SonarQube Analysis
         run: |
-          /opt/sonar-scanner/bin/sonar-scanner \
+          sonar-scanner \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.projectKey=sonartest \
             -Dsonar.sources=.
 
-      # Optional: Fail workflow if Quality Gate fails
+      # Optional: Fail the workflow if Quality Gate fails
       # - name: SonarQube Quality Gate Check
       #   uses: SonarSource/sonarqube-quality-gate-action@v1
       #   timeout-minutes: 5
