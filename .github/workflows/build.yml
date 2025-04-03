@@ -7,7 +7,7 @@ on:
 
 jobs:
   analyze:
-    runs-on: self-hosted  # ✅ Uses your self-hosted runner
+    runs-on: self-hosted  # ✅ Uses your self-hosted runner named 'sonar'
 
     steps:
       - name: Checkout Code
@@ -15,8 +15,10 @@ jobs:
 
       - name: Run SonarQube Scanner
         run: |
-          /opt/sonar-scanner/bin/sonar-scanner \  # ✅ Using your installed SonarScanner
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+          /opt/sonar-scanner/bin/sonar-scanner \
+            -Dsonar.host.url=http://192.168.0.104:9080 \  # ✅ Ensure correct port (9080)
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.projectKey=sonartest \
             -Dsonar.sources=.
+
+
