@@ -76,7 +76,7 @@ function AppContent() {
                   <GetStarted />
                   <HowItWorks />
                   <Benefits />
-                  <FAQ />
+                  <Faq />
                   <ContactUs />
                   <Footer />
                 </>
