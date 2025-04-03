@@ -1,4 +1,4 @@
-name: Build and Analyze with SonarQube
+name: SonarQube Analysis
 
 on:
   push:
@@ -6,38 +6,17 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build and SonarQube Analysis
-    runs-on: ubuntu-latest
+  analyze:
+    runs-on: self-hosted  # ✅ Uses your self-hosted runner
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Ensures full commit history for better analysis
 
-      - name: Install SonarScanner
+      - name: Run SonarQube Scanner
         run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-5.0.1.3006-linux.zip
-          unzip sonar-scanner-5.0.1.3006-linux.zip
-          sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
-          echo "export PATH=$PATH:/opt/sonar-scanner/bin" >> ~/.bashrc
-          source ~/.bashrc
-          sonar-scanner -v  # Check installation
-
-      - name: Run SonarQube Analysis
-        run: |
-          sonar-scanner \
+          /opt/sonar-scanner/bin/sonar-scanner \  # ✅ Using your installed SonarScanner
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.projectKey=sonartest \
             -Dsonar.sources=.
-
-      # Optional: Fail the workflow if Quality Gate fails
-      # - name: SonarQube Quality Gate Check
-      #   uses: SonarSource/sonarqube-quality-gate-action@v1
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
