@@ -1,0 +1,18 @@
+name: Pull Data to Server
+
+on:
+  push:
+    branches: master
+
+jobs:
+  phpunit:
+    runs-on: corona_tracker
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout code
+        working-directory: /home/eqadmin/Downloads/test-sonar/corona_tracker
+        run: |
+          echo "corona_tracker-ci-cd"
+          git pull
+          npm run build
