@@ -13,7 +13,7 @@ jobs:
     runs-on: [self-hosted, frontend]
 
     steps:
-      - name: Checkout Code 
+      - name: Checkout Code  
         uses: actions/checkout@v4
 
       - name: Set Node.js
