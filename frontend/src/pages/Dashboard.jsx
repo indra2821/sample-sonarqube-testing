@@ -6,7 +6,7 @@ import { selectIsDarkMode } from "../Redux/themeSlice";
 const Dashboard = () => {
   const isDarkMode = useSelector(selectIsDarkMode);
   const { name, role, isAuthenticated, tokenChecked } =
-    useSelector(selectCurrentUser);
+    useSelector(selectCurrentUser); 
 
   // Show loading spinner while checking auth status
   if (!tokenChecked) {
