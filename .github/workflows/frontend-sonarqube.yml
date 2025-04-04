@@ -5,8 +5,10 @@ on:
     types: [run-sonarqube]
 
 jobs:
-  sonar-scan:
-    runs-on: [self-hosted, sonartest]
+  analyze-frontend:
+    name: SonarQube Frontend Scan
+    runs-on: sonartest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -15,6 +17,6 @@ jobs:
         run: |
           /opt/sonar-scanner/bin/sonar-scanner \
             -Dsonar.projectKey=frontend-app \
-            -Dsonar.sources=frontend \
+            -Dsonar.sources=frontend/src \
             -Dsonar.host.url=http://192.168.0.104:9080 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
