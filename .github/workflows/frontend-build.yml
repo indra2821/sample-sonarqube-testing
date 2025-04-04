@@ -1,0 +1,49 @@
+name: Frontend Build & SonarQube Scan
+
+on:
+  push:
+    paths:
+      - 'frontend/**'
+    branches:
+      - main
+
+jobs:
+  build-frontend:
+    name: Build Frontend App
+    runs-on: [self-hosted, frontend]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm run build
+
+  analyze-frontend:
+    name: SonarQube Frontend Scan
+    runs-on: [self-hosted, sonartest]
+    needs: build-frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run SonarQube Scanner
+        run: |
+          /opt/sonar-scanner/bin/sonar-scanner \
+            -Dsonar.projectKey=frontend-app \
+            -Dsonar.sources=frontend/src \
+            -Dsonar.host.url=http://192.168.0.104:9080 \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
