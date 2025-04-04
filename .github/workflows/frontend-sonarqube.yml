@@ -7,7 +7,7 @@ on:
 jobs:
   analyze-frontend:
     name: SonarQube Frontend Scan
-    runs-on: sonartest
+    runs-on: sonar
 
     steps:
       - name: Checkout Code
