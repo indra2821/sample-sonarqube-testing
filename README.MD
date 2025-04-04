@@ -20,3 +20,4 @@ just Go to
 /terraform/environments/staging.tfvars       # for staging
            
 /terraform/environments/prod.tfvars          # for production
+ 
