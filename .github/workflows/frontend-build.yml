@@ -1,4 +1,4 @@
-name: Frontend Build Workflow
+name: Frontend Build & SonarQube Scan
 
 on:
   push:
@@ -7,8 +7,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: frontend
+  build-and-scan:
+    name: Build Frontend & Scan with SonarQube
+    runs-on: [self-hosted, frontend]
 
     steps:
       - name: Checkout Code
@@ -20,17 +21,19 @@ jobs:
           node-version: '22'
 
       - name: Install Dependencies
-        run: |
-          cd frontend
-          npm install
+        working-directory: frontend
+        run: npm install
 
       - name: Build Frontend
-        run: |
-          cd frontend
-          npm run build
+        working-directory: frontend
+        run: npm run build
 
-      - name: Trigger SonarQube Scan
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          event-type: run-sonarqube
+      - name: Run SonarQube Scanner
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          /opt/sonar-scanner/bin/sonar-scanner \
+            -Dsonar.projectKey=frontend-app \
+            -Dsonar.sources=frontend/src \
+            -Dsonar.host.url=http://192.168.0.104:9000 \
+            -Dsonar.login=$SONAR_TOKEN
