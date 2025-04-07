@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: frontend
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -27,6 +28,12 @@ jobs:
         run: |
           cd frontend
           npm run build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend
 
       - name: Trigger SonarQube Scan
         uses: peter-evans/repository-dispatch@v3
