@@ -10,13 +10,19 @@ jobs:
     runs-on: sonar
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: ./frontend-build
+
+      - name: List Downloaded Files (Debug)
+        run: ls -R ./frontend-build
 
       - name: Run SonarQube Scanner
         run: |
           /opt/sonar-scanner/bin/sonar-scanner \
             -Dsonar.projectKey=frontend-app \
-            -Dsonar.sources=frontend/src \
+            -Dsonar.sources=frontend-build/src \
             -Dsonar.host.url=http://192.168.0.104:9000 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
